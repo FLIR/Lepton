@@ -1,0 +1,5 @@
+*.o
+*.a
+.*.swp
+tags
+lepton_control/vsync_app
