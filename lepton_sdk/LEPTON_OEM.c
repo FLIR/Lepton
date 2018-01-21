@@ -102,13 +102,13 @@ LEP_RESULT LEP_RunOemPowerDown( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr )
    return( result );
 }
 
-LEP_RESULT LEP_RunOemPowerOn(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr)
+LEP_RESULT LEP_RunOemPowerOn( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr )
 {
    LEP_RESULT result = LEP_OK;
 
-   result = LEP_DirectWriteRegister(portDescPtr, 0x0, 0x0);
+   result = LEP_DirectWriteRegister( portDescPtr, 0x0, 0x0 );
 
-   return(result);
+   return( result );
 }
 
 /**
@@ -123,7 +123,7 @@ LEP_RESULT LEP_RunOemStandby( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr )
    LEP_RESULT  result = LEP_OK;
 
 
-    //result= LEP_RunCommand( portDescPtr, (LEP_COMMAND_ID)LEP_CID_OEM_STANDBY );
+   //result= LEP_RunCommand( portDescPtr, (LEP_COMMAND_ID)LEP_CID_OEM_STANDBY );
 
    return( result );
 }
@@ -188,7 +188,7 @@ LEP_RESULT LEP_GetOemMaskRevision( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
 }
 #if 0
 LEP_RESULT LEP_GetOemMasterID( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                               LEP_OEM_MASTER_ID_T_PTR oemMasterIDPtr )
+                              LEP_OEM_MASTER_ID_T_PTR oemMasterIDPtr )
 {
    LEP_RESULT  result = LEP_OK;
    LEP_UINT16 attributeWordLength = 48; /* 96 bytes  */
@@ -204,9 +204,9 @@ LEP_RESULT LEP_GetOemMasterID( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
    ** Reading the Camera's Chip Master ID
    */
    result = LEP_GetAttribute( portDescPtr,
-                              ( LEP_COMMAND_ID )LEP_CID_OEM_MASTER_ID,
-                              ( LEP_ATTRIBUTE_T_PTR )oemMasterIDPtr,
-                              attributeWordLength );
+                             ( LEP_COMMAND_ID )LEP_CID_OEM_MASTER_ID,
+                             ( LEP_ATTRIBUTE_T_PTR )oemMasterIDPtr,
+                             attributeWordLength );
    return( result );
 }
 #endif
@@ -253,8 +253,8 @@ LEP_RESULT LEP_GetOemCustPartNumber( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
    return( result );
 }
 #else
-LEP_RESULT LEP_GetOemFlirPartNumber(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                    LEP_OEM_PART_NUMBER_T_PTR oemPartNumberPtr)
+LEP_RESULT LEP_GetOemFlirPartNumber( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                     LEP_OEM_PART_NUMBER_T_PTR oemPartNumberPtr )
 {
    LEP_RESULT result = LEP_OK;
    LEP_UINT16 attributeWordLength = 16; /* 32 bytes */
@@ -273,10 +273,10 @@ LEP_RESULT LEP_GetOemFlirPartNumber(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
                               ( LEP_COMMAND_ID )LEP_CID_OEM_FLIR_PART_NUMBER,
                               ( LEP_ATTRIBUTE_T_PTR )oemPartNumberPtr,
                               attributeWordLength );
-   return(result);
+   return( result );
 }
-LEP_RESULT LEP_GetOemCustPartNumber(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                    LEP_OEM_PART_NUMBER_T_PTR oemPartNumberPtr)
+LEP_RESULT LEP_GetOemCustPartNumber( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                     LEP_OEM_PART_NUMBER_T_PTR oemPartNumberPtr )
 {
    LEP_RESULT result = LEP_OK;
    LEP_UINT16 attributeWordLength = 16;   /* 32 bytes */
@@ -290,8 +290,8 @@ LEP_RESULT LEP_GetOemCustPartNumber(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
                               ( LEP_COMMAND_ID )LEP_CID_OEM_CUST_PART_NUMBER,
                               ( LEP_ATTRIBUTE_T_PTR )oemPartNumberPtr,
                               attributeWordLength );
-   
-   return(result);
+
+   return( result );
 }
 #endif
 
@@ -624,8 +624,8 @@ LEP_RESULT LEP_GetOemCalStatus( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
 }
 
 LEP_RESULT LEP_GetOemFFCNormalizationTarget( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                              LEP_OEM_FFC_NORMALIZATION_TARGET_T_PTR ffcTargetPtr )
-{ 
+                                             LEP_OEM_FFC_NORMALIZATION_TARGET_T_PTR ffcTargetPtr )
+{
    LEP_RESULT result = LEP_OK;
    LEP_UINT16 attributeWordLength = 1;    /* FFC Target is a single 16-bit value */
 
@@ -686,7 +686,7 @@ LEP_RESULT LEP_RunOemFFC( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr )
    {
       LEP_GetOemCalStatus( portDescPtr, &oemStatus );
    }
-   
+
    return( result );
 
 }
@@ -707,26 +707,45 @@ LEP_RESULT LEP_GetOemFrameMean( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
                               ( LEP_ATTRIBUTE_T_PTR )frameAveragePtr,
                               attributeWordLength );
 
-    return( result );
+   return( result );
 }
 
-LEP_RESULT LEP_GetOemPowerMode(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                               LEP_OEM_POWER_STATE_E_PTR powerModePtr)
+LEP_RESULT LEP_GetOemPowerMode( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                LEP_OEM_POWER_STATE_E_PTR powerModePtr )
 {
    LEP_RESULT result = LEP_OK;
    LEP_UINT16 attributeWordLength = 2;    /* enums are 32-bit */
 
-   if(powerModePtr == NULL)
+   if( powerModePtr == NULL )
    {
-      return(LEP_BAD_ARG_POINTER_ERROR);
+      return( LEP_BAD_ARG_POINTER_ERROR );
    }
 
-   result = LEP_GetAttribute(portDescPtr,
-                             (LEP_COMMAND_ID)LEP_CID_OEM_POWER_MODE,
-                             (LEP_ATTRIBUTE_T_PTR)powerModePtr,
-                             attributeWordLength);
+   result = LEP_GetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_OEM_POWER_MODE,
+                              ( LEP_ATTRIBUTE_T_PTR )powerModePtr,
+                              attributeWordLength );
 
-   return(result);
+   return( result );
+}
+
+LEP_RESULT LEP_SetOemPowerMode( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                LEP_OEM_POWER_STATE_E powerMode )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2;    /* enums are 32-bit */
+
+   if( powerMode >= LEP_OEM_END_POWER_MODE )
+   {
+      return( LEP_RANGE_ERROR );
+   }
+
+   result = LEP_SetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_OEM_POWER_MODE,
+                              ( LEP_ATTRIBUTE_T_PTR ) & powerMode,
+                              attributeWordLength );
+
+   return( result );
 }
 
 LEP_RESULT LEP_GetOemGpioMode( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
@@ -801,4 +820,239 @@ LEP_RESULT LEP_SetOemGpioVsyncPhaseDelay( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr
 
    return( result );
 }
- 
+
+LEP_RESULT LEP_GetOemUserDefaultsState( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                        LEP_OEM_USER_PARAMS_STATE_E_PTR userParamsStatePtr )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2;    /* enums are 32-bit */
+
+   if( userParamsStatePtr == NULL )
+   {
+      return( LEP_BAD_ARG_POINTER_ERROR );
+   }
+
+   result = LEP_GetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_OEM_USER_DEFAULTS,
+                              ( LEP_ATTRIBUTE_T_PTR )userParamsStatePtr,
+                              attributeWordLength );
+
+   return( result );
+}
+
+LEP_RESULT LEP_RunOemUserDefaultsCopyToOtp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr )
+{
+   LEP_RESULT result = LEP_OK;
+
+   result = LEP_RunCommand( portDescPtr, ( LEP_COMMAND_ID )LEP_CID_OEM_USER_DEFAULTS );
+
+   return( result );
+}
+
+LEP_RESULT LEP_RunOemUserDefaultsRestore( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr )
+{
+   LEP_RESULT result = LEP_OK;
+
+   result = LEP_RunCommand( portDescPtr, ( LEP_COMMAND_ID )LEP_CID_OEM_USER_DEFAULTS_RESTORE );
+
+   return( result );
+}
+
+
+
+LEP_RESULT LEP_SetOemThermalShutdownEnable( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                            LEP_OEM_THERMAL_SHUTDOWN_ENABLE_T ThermalShutdownEnableState )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2; /* one enum = two words */
+
+   if( ThermalShutdownEnableState.oemThermalShutdownEnable >= LEP_OEM_END_STATE )
+   {
+      return( LEP_RANGE_ERROR );
+   }
+   /* Perform Command
+   ** Writing the Camera's current video freeze enable state
+   */
+   result = LEP_SetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_OEM_THERMAL_SHUTDOWN_ENABLE_STATE,
+                              ( LEP_ATTRIBUTE_T_PTR ) & ThermalShutdownEnableState,
+                              attributeWordLength );
+   return( result );
+}
+
+LEP_RESULT LEP_GetOemThermalShutdownEnable( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                            LEP_OEM_THERMAL_SHUTDOWN_ENABLE_T_PTR ThermalShutdownEnableStatePtr )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2; /* one enum = two words */
+
+   if( ThermalShutdownEnableStatePtr == NULL )
+   {
+      return( LEP_BAD_ARG_POINTER_ERROR );
+   }
+   result = LEP_GetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_OEM_THERMAL_SHUTDOWN_ENABLE_STATE,
+                              ( LEP_ATTRIBUTE_T_PTR )ThermalShutdownEnableStatePtr,
+                              attributeWordLength );
+   return( result );
+}
+
+LEP_RESULT LEP_SetOemShutterProfileObj( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                        LEP_OEM_SHUTTER_PROFILE_OBJ_T ShutterProfileObj )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2; /* 2 words */
+
+   /* Perform Command
+   ** Writing the Camera's current video freeze enable state
+   */
+   result = LEP_SetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_OEM_SHUTTER_PROFILE_OBJ,
+                              ( LEP_ATTRIBUTE_T_PTR ) & ShutterProfileObj,
+                              attributeWordLength );
+   return( result );
+}
+
+LEP_RESULT LEP_GetOemShutterProfileObj( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                        LEP_OEM_SHUTTER_PROFILE_OBJ_T_PTR ShutterProfileObjPtr )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2; /* 2 words */
+
+   if( ShutterProfileObjPtr == NULL )
+   {
+      return( LEP_BAD_ARG_POINTER_ERROR );
+   }
+   result = LEP_GetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_OEM_SHUTTER_PROFILE_OBJ,
+                              ( LEP_ATTRIBUTE_T_PTR )ShutterProfileObjPtr,
+                              attributeWordLength );
+   return( result );
+}
+
+
+LEP_RESULT LEP_SetOemBadPixelReplaceControl( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                             LEP_OEM_BAD_PIXEL_REPLACE_CONTROL_T BadPixelReplaceControl )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2; /* two word enums */
+
+   /* Perform Command
+   ** Writing the Camera's current video freeze enable state
+   */
+   result = LEP_SetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_OEM_BAD_PIXEL_REPLACE_CONTROL,
+                              ( LEP_ATTRIBUTE_T_PTR ) & BadPixelReplaceControl,
+                              attributeWordLength );
+
+   return( result );
+}
+
+LEP_RESULT LEP_GetOemBadPixelReplaceControl( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                             LEP_OEM_BAD_PIXEL_REPLACE_CONTROL_T_PTR BadPixelReplaceControlPtr )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2; /* one enum */
+   if( BadPixelReplaceControlPtr == NULL )
+   {
+      return( LEP_BAD_ARG_POINTER_ERROR );
+   }
+   result = LEP_GetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_OEM_BAD_PIXEL_REPLACE_CONTROL,
+                              ( LEP_ATTRIBUTE_T_PTR )BadPixelReplaceControlPtr,
+                              attributeWordLength );
+   return( result );
+}
+
+LEP_RESULT LEP_SetOemTemporalFilterControl( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                            LEP_OEM_TEMPORAL_FILTER_CONTROL_T TemporalFilterControl )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2; /* one enum = two words */
+
+   /* Perform Command
+   ** Writing the Camera's current video freeze enable state
+   */
+   result = LEP_SetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_OEM_TEMPORAL_FILTER_CONTROL,
+                              ( LEP_ATTRIBUTE_T_PTR ) & TemporalFilterControl,
+                              attributeWordLength );
+   return( result );
+}
+
+LEP_RESULT LEP_GetOemTemporalFilterControl( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                            LEP_OEM_TEMPORAL_FILTER_CONTROL_T_PTR TemporalFilterControlPtr )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2; /* one enum = two words */
+   if( TemporalFilterControlPtr == NULL )
+   {
+      return( LEP_BAD_ARG_POINTER_ERROR );
+   }
+   result = LEP_GetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_OEM_TEMPORAL_FILTER_CONTROL,
+                              ( LEP_ATTRIBUTE_T_PTR )TemporalFilterControlPtr,
+                              attributeWordLength );
+   return( result );
+}
+
+LEP_RESULT LEP_SetOemColumnNoiseEstimateControl( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                 LEP_OEM_COLUMN_NOISE_ESTIMATE_CONTROL_T ColumnNoiseEstimateControl )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2; /* one enum = two words */
+
+   result = LEP_SetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_OEM_COLUMN_NOISE_ESTIMATE_CONTROL,
+                              ( LEP_ATTRIBUTE_T_PTR ) & ColumnNoiseEstimateControl,
+                              attributeWordLength );
+   return( result );
+}
+
+LEP_RESULT LEP_GetOemColumnNoiseEstimateControl( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                 LEP_OEM_COLUMN_NOISE_ESTIMATE_CONTROL_T_PTR ColumnNoiseEstimateControlPtr )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2; /* one enum = two words */
+   if( ColumnNoiseEstimateControlPtr == NULL )
+   {
+      return( LEP_BAD_ARG_POINTER_ERROR );
+   }
+   result = LEP_GetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_OEM_COLUMN_NOISE_ESTIMATE_CONTROL,
+                              ( LEP_ATTRIBUTE_T_PTR )ColumnNoiseEstimateControlPtr,
+                              attributeWordLength );
+   return( result );
+}
+
+LEP_RESULT LEP_GetOemPixelNoiseSettings( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                         LEP_OEM_PIXEL_NOISE_SETTINGS_T_PTR pixelNoiseSettingsPtr )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2;    /* struct size 4 bytes */
+
+   if( pixelNoiseSettingsPtr == NULL )
+   {
+      return( LEP_BAD_ARG_POINTER_ERROR );
+   }
+
+   result = LEP_GetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_OEM_PIXEL_NOISE_ESTIMATE_CONTROL,
+                              ( LEP_ATTRIBUTE_T_PTR )pixelNoiseSettingsPtr,
+                              attributeWordLength );
+
+   return( result );
+}
+LEP_RESULT LEP_SetOemPixelNoiseSettings( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                         LEP_OEM_PIXEL_NOISE_SETTINGS_T pixelNoiseSettings )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2;    /* struct size 4 bytes */
+
+   result = LEP_SetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_OEM_PIXEL_NOISE_ESTIMATE_CONTROL,
+                              ( LEP_ATTRIBUTE_T_PTR ) & pixelNoiseSettings,
+                              attributeWordLength );
+
+   return( result );
+}

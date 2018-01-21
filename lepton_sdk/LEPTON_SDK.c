@@ -90,7 +90,7 @@
 /******************************************************************************/
 /** PRIVATE FUNCTION DECLARATIONS                                            **/
 /******************************************************************************/
-//static LEP_RESULT _LEP_DelayCounts(LEP_UINT32 counts);
+static LEP_RESULT _LEP_DelayCounts(LEP_UINT32 counts);
 
 /******************************************************************************/
 /** EXPORTED PUBLIC DATA                                                     **/
@@ -233,6 +233,34 @@ LEP_RESULT LEP_RunCommand(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
 }
 
 
+LEP_RESULT LEP_SelectDevice(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr, 
+                            LEP_PROTOCOL_DEVICE_E device)
+{
+    LEP_RESULT result = LEP_OK;
+
+    /* Validate the port descriptor
+    */ 
+    if( portDescPtr == NULL )
+    {
+        return(LEP_COMM_PORT_NOT_OPEN);
+    }
+
+    /* Select Device
+    */
+    if( portDescPtr->portType == LEP_CCI_TWI )
+    {
+        result = LEP_I2C_SelectDevice(portDescPtr, device);
+    }
+    else if( portDescPtr->portType == LEP_CCI_SPI )
+    {
+
+    }
+    else
+        result = LEP_COMM_INVALID_PORT_ERROR;
+
+    return(result);
+}
+
 /******************************************************************************/
 /**
  * Opens a Lepton commnications port of the specified type and
@@ -257,10 +285,10 @@ LEP_RESULT LEP_RunCommand(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
  */
 LEP_RESULT LEP_OpenPort(LEP_UINT16 portID,
                         LEP_CAMERA_PORT_E portType,
-                        LEP_UINT32   portBaudRate,
+                        LEP_UINT16   portBaudRate,
                         LEP_CAMERA_PORT_DESC_T_PTR portDescPtr)
 {
-    LEP_RESULT result = LEP_OK;
+    LEP_RESULT result;
     LEP_UINT8 deviceAddress;
 
     /* Attempt to acquire memory
@@ -318,7 +346,7 @@ LEP_RESULT LEP_OpenPort(LEP_UINT16 portID,
 
 LEP_RESULT LEP_ClosePort(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr)
 {
-    LEP_RESULT result = LEP_OK;
+    LEP_RESULT result;
 	
     /* Validate the port descriptor
     */ 
@@ -352,7 +380,7 @@ LEP_RESULT LEP_ClosePort(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr)
 
 LEP_RESULT LEP_ResetPort(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr)
 {
-    LEP_RESULT result = LEP_OK;
+    LEP_RESULT result;
 
     /* Validate the port descriptor
     */ 
@@ -379,7 +407,7 @@ LEP_RESULT LEP_ResetPort(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr)
 LEP_RESULT LEP_GetPortStatus(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr, 
                              LEP_UINT16 *status)
 {
-    LEP_RESULT result = LEP_OK;
+    LEP_RESULT result;
 
 
     return(result);
@@ -460,7 +488,7 @@ LEP_RESULT LEP_DirectWriteBuffer(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
                                  LEP_ATTRIBUTE_T_PTR attributePtr,
                                  LEP_UINT16 attributeWordLength)
 {
-   LEP_RESULT result = LEP_OK;
+   LEP_RESULT result;
    /* Validate the port descriptor
    */ 
    if( portDescPtr == NULL )
@@ -528,7 +556,7 @@ LEP_RESULT LEP_GetCameraBootStatus(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
 /******************************************************************************/
 /** PRIVATE MODULE FUNCTIONS                                                 **/
 /******************************************************************************/
-#if 0
+
 LEP_RESULT _LEP_DelayCounts(LEP_UINT32 counts)
 {
     LEP_UINT32 a;
@@ -542,5 +570,5 @@ LEP_RESULT _LEP_DelayCounts(LEP_UINT32 counts)
     }
     return(LEP_OK);
 }
-#endif
+
 

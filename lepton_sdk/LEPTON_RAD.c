@@ -263,6 +263,157 @@ LEP_RESULT LEP_SetRadRBFOExternal0( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
 }
 
 
+LEP_RESULT LEP_GetRadInternalRBFOHighGain( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                           LEP_RBFO_T_PTR radRBFOPtr )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 8;    // RBFO is 8 16-bit words
+
+   if( radRBFOPtr == NULL )
+   {
+      return( LEP_BAD_ARG_POINTER_ERROR );
+   }
+   result = LEP_GetAttribute(  portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_RAD_RBFO_INTERNAL,
+                              ( LEP_ATTRIBUTE_T_PTR )radRBFOPtr,
+                              attributeWordLength );
+
+   return( result );
+}
+
+
+LEP_RESULT LEP_SetRadInternalRBFOHighGain( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                           LEP_RBFO_T_PTR radRBFOPtr )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 8;    // RBFO is 8 16-bit words
+
+   if( radRBFOPtr == NULL )
+   {
+      return( LEP_BAD_ARG_POINTER_ERROR );
+   }
+   result = LEP_SetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_RAD_RBFO_INTERNAL,
+                              ( LEP_ATTRIBUTE_T_PTR )radRBFOPtr,
+                              attributeWordLength );
+
+   return( result );
+}
+
+
+LEP_RESULT LEP_GetRadExternalRBFOHighGain( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                           LEP_RBFO_T_PTR radRBFOPtr )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 8;    // RBFO is 8 16-bit words
+
+   if( radRBFOPtr == NULL )
+   {
+      return( LEP_BAD_ARG_POINTER_ERROR );
+   }
+   result = LEP_GetAttribute(  portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_RAD_RBFO_EXTERNAL,
+                              ( LEP_ATTRIBUTE_T_PTR )radRBFOPtr,
+                              attributeWordLength );
+
+   return( result );
+}
+
+
+LEP_RESULT LEP_SetRadExternalRBFOHighGain( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                           LEP_RBFO_T_PTR radRBFOPtr )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 8;    // RBFO is 4 16-bit words
+
+   if( radRBFOPtr == NULL )
+   {
+      return( LEP_BAD_ARG_POINTER_ERROR );
+   }
+   result = LEP_SetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_RAD_RBFO_EXTERNAL,
+                              ( LEP_ATTRIBUTE_T_PTR )radRBFOPtr,
+                              attributeWordLength );
+
+   return( result );
+}
+
+
+LEP_RESULT LEP_GetRadInternalRBFOLowGain( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                           LEP_RBFO_T_PTR radRBFOPtr )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 8;    // RBFO is 8 16-bit words
+
+   if( radRBFOPtr == NULL )
+   {
+      return( LEP_BAD_ARG_POINTER_ERROR );
+   }
+   result = LEP_GetAttribute(  portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_RAD_RBFO_INTERNAL_LG,
+                              ( LEP_ATTRIBUTE_T_PTR )radRBFOPtr,
+                              attributeWordLength );
+
+   return( result );
+}
+
+
+LEP_RESULT LEP_SetRadInternalRBFOLowGain( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                           LEP_RBFO_T_PTR radRBFOPtr )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 8;    // RBFO is 8 16-bit words
+
+   if( radRBFOPtr == NULL )
+   {
+      return( LEP_BAD_ARG_POINTER_ERROR );
+   }
+   result = LEP_SetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_RAD_RBFO_INTERNAL_LG,
+                              ( LEP_ATTRIBUTE_T_PTR )radRBFOPtr,
+                              attributeWordLength );
+
+   return( result );
+}
+
+
+LEP_RESULT LEP_GetRadExternalRBFOLowGain( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                           LEP_RBFO_T_PTR radRBFOPtr )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 8;    // RBFO is 8 16-bit words
+
+   if( radRBFOPtr == NULL )
+   {
+      return( LEP_BAD_ARG_POINTER_ERROR );
+   }
+   result = LEP_GetAttribute(  portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_RAD_RBFO_EXTERNAL_LG,
+                              ( LEP_ATTRIBUTE_T_PTR )radRBFOPtr,
+                              attributeWordLength );
+
+   return( result );
+}
+
+
+LEP_RESULT LEP_SetRadExternalRBFOLowGain( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                           LEP_RBFO_T_PTR radRBFOPtr )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 8;    // RBFO is 4 16-bit words
+
+   if( radRBFOPtr == NULL )
+   {
+      return( LEP_BAD_ARG_POINTER_ERROR );
+   }
+   result = LEP_SetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_RAD_RBFO_EXTERNAL_LG,
+                              ( LEP_ATTRIBUTE_T_PTR )radRBFOPtr,
+                              attributeWordLength );
+
+   return( result );
+}
+
 LEP_RESULT LEP_GetRadResponsivityShift( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
                                         LEP_RAD_RS_T_PTR radResponsivityShiftPtr )
 {
@@ -475,7 +626,7 @@ LEP_RESULT LEP_SetRadTAuxCLut( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
 }
 
 LEP_RESULT LEP_GetRadTFpaLut( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                               LEP_RAD_LUT256_T_PTR radTFpaLutPtr )
+                              LEP_RAD_LUT256_T_PTR radTFpaLutPtr )
 {
    LEP_RESULT result = LEP_OK;
    LEP_UINT16 attributeWordLength = 256;    // 256 16-bit word LUT
@@ -494,7 +645,7 @@ LEP_RESULT LEP_GetRadTFpaLut( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
 
 
 LEP_RESULT LEP_SetRadTFpaLut( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                               LEP_RAD_LUT256_T_PTR radTFpaLutPtr )
+                              LEP_RAD_LUT256_T_PTR radTFpaLutPtr )
 {
    LEP_RESULT result = LEP_OK;
    LEP_UINT16 attributeWordLength = 256;    // 256 16-bit word LUT
@@ -1018,102 +1169,47 @@ LEP_RESULT LEP_SetRadMffcFlux( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
    return( result );
 }
 
-LEP_RESULT LEP_GetRadFrameMedianPixelValue(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                           LEP_RAD_MEDIAN_VALUE_T_PTR frameMedianPtr)
+LEP_RESULT LEP_GetRadFrameMedianPixelValue( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                            LEP_RAD_MEDIAN_VALUE_T_PTR frameMedianPtr )
 {
    LEP_RESULT result = LEP_OK;
    LEP_UINT16 attributeWordLength = 1;    /* 1 16-bit word */
 
-   result = LEP_GetAttribute(portDescPtr,
-                             (LEP_COMMAND_ID)LEP_CID_RAD_FRAME_MEDIAN_VALUE,
-                             (LEP_ATTRIBUTE_T_PTR)frameMedianPtr,
-                             attributeWordLength);
+   result = LEP_GetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_RAD_FRAME_MEDIAN_VALUE,
+                              ( LEP_ATTRIBUTE_T_PTR )frameMedianPtr,
+                              attributeWordLength );
 
-   return(result);
+   return( result );
 }
 
-LEP_RESULT LEP_GetRadTEqLensLut(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                LEP_RAD_LUT128_T_PTR radTEqLensLutPtr)
-{
-   LEP_RESULT result = LEP_OK;
-   LEP_UINT16 attributeWordLength = 128;    // 128 16-bit word LUT
 
-   result = LEP_GetAttribute(portDescPtr,
-                             (LEP_COMMAND_ID)LEP_CID_RAD_TEQ_LENS_LUT,
-                             (LEP_ATTRIBUTE_T_PTR)radTEqLensLutPtr,
-                             attributeWordLength);
-
-   return(result);
-}
-
-LEP_RESULT LEP_SetRadTEqLensLut(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                LEP_RAD_LUT128_T_PTR radTEqLensLutPtr)
-{
-   LEP_RESULT result = LEP_OK;
-   LEP_UINT16 attributeWordLength = 128;    // 128 16-bit word LUT
-
-   result = LEP_SetAttribute(portDescPtr,
-                             (LEP_COMMAND_ID)LEP_CID_RAD_TEQ_LENS_LUT,
-                             (LEP_ATTRIBUTE_T_PTR)radTEqLensLutPtr,
-                             attributeWordLength);
-
-   return(result);
-}
-
-LEP_RESULT LEP_GetRadTEqHousingLut(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                   LEP_RAD_LUT128_T_PTR radTEqHousingLutPtr)
-{
-   LEP_RESULT result = LEP_OK;
-   LEP_UINT16 attributeWordLength = 128;    // 128 16-bit word LUT
-
-   result = LEP_GetAttribute(portDescPtr,
-                          (LEP_COMMAND_ID)LEP_CID_RAD_TEQ_HOUSING_LUT,
-                          (LEP_ATTRIBUTE_T_PTR)radTEqHousingLutPtr,
-                          attributeWordLength);
-
-   return(result);
-}
-
-LEP_RESULT LEP_SetRadTEqHousingLut(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                   LEP_RAD_LUT128_T_PTR radTEqHousingLutPtr)
-{
-   LEP_RESULT result = LEP_OK;
-   LEP_UINT16 attributeWordLength = 128;    // 128 16-bit word LUT
-
-   result = LEP_SetAttribute(portDescPtr,
-                             (LEP_COMMAND_ID)LEP_CID_RAD_TEQ_HOUSING_LUT,
-                             (LEP_ATTRIBUTE_T_PTR)radTEqHousingLutPtr,
-                             attributeWordLength);
-
-   return(result);
-}
-
-LEP_RESULT LEP_GetRadMLGLut(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                            LEP_RAD_SIGNED_LUT128_T_PTR radMLGLutPtr)
-{
-   LEP_RESULT result = LEP_OK;
-   LEP_UINT16 attributeWordLength = 128;    // 256 16-bit word LUT
-   
-   result = LEP_GetAttribute(portDescPtr,
-                             (LEP_COMMAND_ID)LEP_CID_RAD_MLG_LUT,
-                             (LEP_ATTRIBUTE_T_PTR)radMLGLutPtr,
-                             attributeWordLength);
-
-   return(result);
-}
-
-LEP_RESULT LEP_SetRadMLGLut(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                            LEP_RAD_SIGNED_LUT128_T_PTR radMLGLutPtr)
+LEP_RESULT LEP_GetRadMLGLut( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                             LEP_RAD_SIGNED_LUT128_T_PTR radMLGLutPtr )
 {
    LEP_RESULT result = LEP_OK;
    LEP_UINT16 attributeWordLength = 128;    // 256 16-bit word LUT
 
-   result = LEP_SetAttribute(portDescPtr,
-                             (LEP_COMMAND_ID)LEP_CID_RAD_MLG_LUT,
-                             (LEP_ATTRIBUTE_T_PTR)radMLGLutPtr,
-                             attributeWordLength);
+   result = LEP_GetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_RAD_MLG_LUT,
+                              ( LEP_ATTRIBUTE_T_PTR )radMLGLutPtr,
+                              attributeWordLength );
 
-   return(result);
+   return( result );
+}
+
+LEP_RESULT LEP_SetRadMLGLut( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                             LEP_RAD_SIGNED_LUT128_T_PTR radMLGLutPtr )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 128;    // 256 16-bit word LUT
+
+   result = LEP_SetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_RAD_MLG_LUT,
+                              ( LEP_ATTRIBUTE_T_PTR )radMLGLutPtr,
+                              attributeWordLength );
+
+   return( result );
 }
 #if USE_DEPRECATED_HOUSING_TCP_INTERFACE
 LEP_RESULT LEP_GetRadTHousingTcp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
@@ -1167,7 +1263,7 @@ LEP_RESULT LEP_GetRadHousingTcp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
 
 
 LEP_RESULT LEP_SetRadHousingTcp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                  LEP_RAD_LINEAR_TEMP_CORRECTION_T RadHousingTcp )
+                                 LEP_RAD_LINEAR_TEMP_CORRECTION_T RadHousingTcp )
 {
    LEP_RESULT result = LEP_OK;
    LEP_UINT16 attributeWordLength = 4; /* single 16-bit value */
@@ -1185,7 +1281,7 @@ LEP_RESULT LEP_SetRadHousingTcp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
 
 
 LEP_RESULT LEP_GetRadShutterTcp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                   LEP_RAD_LINEAR_TEMP_CORRECTION_T_PTR RadShutterTcpPtr )
+                                 LEP_RAD_LINEAR_TEMP_CORRECTION_T_PTR RadShutterTcpPtr )
 {
    LEP_RESULT result = LEP_OK;
    LEP_UINT16 attributeWordLength = 4;    // LEP_RAD_LINEAR_TEMP_CORRECTION_T is 4 16-bit words
@@ -1204,7 +1300,7 @@ LEP_RESULT LEP_GetRadShutterTcp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
 
 
 LEP_RESULT LEP_SetRadShutterTcp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                   LEP_RAD_LINEAR_TEMP_CORRECTION_T RadShutterTcp )
+                                 LEP_RAD_LINEAR_TEMP_CORRECTION_T RadShutterTcp )
 {
    LEP_RESULT result = LEP_OK;
    LEP_UINT16 attributeWordLength = 4; /* single 16-bit value */
@@ -1221,7 +1317,7 @@ LEP_RESULT LEP_SetRadShutterTcp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
 
 
 LEP_RESULT LEP_GetRadLensTcp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                   LEP_RAD_LINEAR_TEMP_CORRECTION_T_PTR RadLensTcpPtr )
+                              LEP_RAD_LINEAR_TEMP_CORRECTION_T_PTR RadLensTcpPtr )
 {
    LEP_RESULT result = LEP_OK;
    LEP_UINT16 attributeWordLength = 4;    // LEP_RAD_LINEAR_TEMP_CORRECTION_T is 4 16-bit words
@@ -1240,7 +1336,7 @@ LEP_RESULT LEP_GetRadLensTcp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
 
 
 LEP_RESULT LEP_SetRadLensTcp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                   LEP_RAD_LINEAR_TEMP_CORRECTION_T RadLensTcp )
+                              LEP_RAD_LINEAR_TEMP_CORRECTION_T RadLensTcp )
 {
    LEP_RESULT result = LEP_OK;
    LEP_UINT16 attributeWordLength = 4; /* 4 16-bit value */
@@ -1254,101 +1350,402 @@ LEP_RESULT LEP_SetRadLensTcp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
 }
 
 
-LEP_RESULT LEP_GetRadPreviousGlobalOffset(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                          LEP_RAD_GLOBAL_OFFSET_T_PTR globalOffsetPtr)
+LEP_RESULT LEP_GetRadPreviousGlobalOffset( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                           LEP_RAD_GLOBAL_OFFSET_T_PTR globalOffsetPtr )
 {
    LEP_RESULT result = LEP_OK;
    LEP_UINT16 attributeWordLength = 1;    /* 1 16-bit value */
 
-   result = LEP_GetAttribute(portDescPtr,
-                             (LEP_COMMAND_ID)LEP_CID_RAD_PREVIOUS_GLOBAL_OFFSET,
-                             (LEP_ATTRIBUTE_T_PTR)globalOffsetPtr,
-                             attributeWordLength);
+   result = LEP_GetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_RAD_PREVIOUS_GLOBAL_OFFSET,
+                              ( LEP_ATTRIBUTE_T_PTR )globalOffsetPtr,
+                              attributeWordLength );
 
-   return(result);
+   return( result );
 }
 
-LEP_RESULT LEP_GetRadPreviousGlobalGain(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                        LEP_RAD_GLOBAL_GAIN_T_PTR globalGainPtr)
+LEP_RESULT LEP_GetRadPreviousGlobalGain( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                         LEP_RAD_GLOBAL_GAIN_T_PTR globalGainPtr )
 {
    LEP_RESULT result = LEP_OK;
    LEP_UINT16 attributeWordLength = 1;    /* 1 16-bit value */
 
-   result = LEP_GetAttribute(portDescPtr,
-                             (LEP_COMMAND_ID)LEP_CID_RAD_PREVIOUS_GLOBAL_GAIN,
-                             (LEP_ATTRIBUTE_T_PTR)globalGainPtr,
-                             attributeWordLength);
+   result = LEP_GetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_RAD_PREVIOUS_GLOBAL_GAIN,
+                              ( LEP_ATTRIBUTE_T_PTR )globalGainPtr,
+                              attributeWordLength );
 
-   return(result);
+   return( result );
 }
 
-LEP_RESULT LEP_GetGlobalGainFFC(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                LEP_RAD_GLOBAL_GAIN_T_PTR globalGainFfcPtr)
+LEP_RESULT LEP_GetGlobalGainFFC( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                 LEP_RAD_GLOBAL_GAIN_T_PTR globalGainFfcPtr )
 {
    LEP_RESULT result = LEP_OK;
    LEP_UINT16 attributeWordLength = 1;    /* 1 16-bit value */
 
-   result = LEP_GetAttribute(portDescPtr,
-                             (LEP_COMMAND_ID)LEP_CID_RAD_GLOBAL_GAIN_FFC,
-                             (LEP_ATTRIBUTE_T_PTR)globalGainFfcPtr,
-                             attributeWordLength);
+   result = LEP_GetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_RAD_GLOBAL_GAIN_FFC,
+                              ( LEP_ATTRIBUTE_T_PTR )globalGainFfcPtr,
+                              attributeWordLength );
 
-   return(result);
+   return( result );
 }
 
-LEP_RESULT LEP_GetRadCnfScaleFactor(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                    LEP_RAD_PARAMETER_SCALE_FACTOR_T_PTR scaleFactorPtr)
+LEP_RESULT LEP_GetRadCnfScaleFactor( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                     LEP_RAD_PARAMETER_SCALE_FACTOR_T_PTR scaleFactorPtr )
 {
    LEP_RESULT result = LEP_OK;
    LEP_UINT16 attributeWordLength = 1;    /* 1 16-bit value */
 
-   if(scaleFactorPtr == NULL)
+   if( scaleFactorPtr == NULL )
+   {
+      return( LEP_BAD_ARG_POINTER_ERROR );
+   }
+
+   result = LEP_GetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_RAD_CNF_SCALE_FACTOR,
+                              ( LEP_ATTRIBUTE_T_PTR )scaleFactorPtr,
+                              attributeWordLength );
+
+   return( result );
+}
+LEP_RESULT LEP_GetRadTnfScaleFactor( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                     LEP_RAD_PARAMETER_SCALE_FACTOR_T_PTR scaleFactorPtr )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 1;    /* 1 16-bit value */
+
+   if( scaleFactorPtr == NULL )
+   {
+      return( LEP_BAD_ARG_POINTER_ERROR );
+   }
+
+   result = LEP_GetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_RAD_TNF_SCALE_FACTOR,
+                              ( LEP_ATTRIBUTE_T_PTR )scaleFactorPtr,
+                              attributeWordLength );
+
+   return( result );
+}
+LEP_RESULT LEP_GetRadSnfScaleFactor( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                     LEP_RAD_PARAMETER_SCALE_FACTOR_T_PTR scaleFactorPtr )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 1;    /* 1 16-bit value */
+
+   if( scaleFactorPtr == NULL )
+   {
+      return( LEP_BAD_ARG_POINTER_ERROR );
+   }
+
+   result = LEP_GetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_RAD_SNF_SCALE_FACTOR,
+                              ( LEP_ATTRIBUTE_T_PTR )scaleFactorPtr,
+                              attributeWordLength );
+
+   return( result );
+}
+
+LEP_RESULT LEP_GetRadArbitraryOffset( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                      LEP_RAD_ARBITRARY_OFFSET_T_PTR arbitraryOffsetPtr )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 1;    /* 1 16-bit value */
+
+   if( arbitraryOffsetPtr == NULL )
+   {
+      return( LEP_BAD_ARG_POINTER_ERROR );
+   }
+
+   result = LEP_GetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_RAD_ARBITRARY_OFFSET,
+                              ( LEP_ATTRIBUTE_T_PTR )arbitraryOffsetPtr,
+                              attributeWordLength );
+
+   return( result );
+}
+
+LEP_RESULT LEP_SetRadArbitraryOffset( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                      LEP_RAD_ARBITRARY_OFFSET_T arbitraryOffset )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 1;
+
+   result = LEP_SetAttribute( portDescPtr,
+                              ( LEP_COMMAND_ID )LEP_CID_RAD_ARBITRARY_OFFSET,
+                              ( LEP_ATTRIBUTE_T_PTR ) & arbitraryOffset,
+                              attributeWordLength );
+
+   return( result );
+}
+
+LEP_RESULT LEP_GetRadFluxLinearParams(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                      LEP_RAD_FLUX_LINEAR_PARAMS_T_PTR fluxParamsPtr)
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 8;
+
+   if(fluxParamsPtr == NULL)
    {
       return(LEP_BAD_ARG_POINTER_ERROR);
    }
 
    result = LEP_GetAttribute(portDescPtr,
-                             (LEP_COMMAND_ID)LEP_CID_RAD_CNF_SCALE_FACTOR,
-                             (LEP_ATTRIBUTE_T_PTR)scaleFactorPtr,
+                             (LEP_COMMAND_ID)LEP_CID_RAD_FLUX_LINEAR_PARAMS,
+                             (LEP_ATTRIBUTE_T_PTR)fluxParamsPtr,
                              attributeWordLength);
 
    return(result);
 }
-LEP_RESULT LEP_GetRadTnfScaleFactor(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                    LEP_RAD_PARAMETER_SCALE_FACTOR_T_PTR scaleFactorPtr)
+
+LEP_RESULT LEP_SetRadFluxLinearParams(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                      LEP_RAD_FLUX_LINEAR_PARAMS_T fluxParams)
 {
    LEP_RESULT result = LEP_OK;
-   LEP_UINT16 attributeWordLength = 1;    /* 1 16-bit value */
+   LEP_UINT16 attributeWordLength = 8;
 
-   if(scaleFactorPtr == NULL)
+   result = LEP_SetAttribute(portDescPtr,
+                             (LEP_COMMAND_ID)LEP_CID_RAD_FLUX_LINEAR_PARAMS,
+                             (LEP_ATTRIBUTE_T_PTR)&fluxParams,
+                             attributeWordLength);
+
+   return(result);
+}
+
+LEP_RESULT LEP_GetRadTLinearEnableState(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                        LEP_RAD_ENABLE_E_PTR enableStatePtr)
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2;
+
+   if(enableStatePtr == NULL)
    {
       return(LEP_BAD_ARG_POINTER_ERROR);
    }
 
    result = LEP_GetAttribute(portDescPtr,
-                             (LEP_COMMAND_ID)LEP_CID_RAD_TNF_SCALE_FACTOR,
-                             (LEP_ATTRIBUTE_T_PTR)scaleFactorPtr,
+                             (LEP_COMMAND_ID)LEP_CID_RAD_TLINEAR_ENABLE_STATE,
+                             (LEP_ATTRIBUTE_T_PTR)enableStatePtr,
                              attributeWordLength);
-
    return(result);
 }
-LEP_RESULT LEP_GetRadSnfScaleFactor(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                    LEP_RAD_PARAMETER_SCALE_FACTOR_T_PTR scaleFactorPtr)
+
+LEP_RESULT LEP_SetRadTLinearEnableState(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                        LEP_RAD_ENABLE_E enableState)
 {
    LEP_RESULT result = LEP_OK;
-   LEP_UINT16 attributeWordLength = 1;    /* 1 16-bit value */
+   LEP_UINT16 attributeWordLength = 2;
 
-   if(scaleFactorPtr == NULL)
+   result = LEP_SetAttribute(portDescPtr,
+                             (LEP_COMMAND_ID)LEP_CID_RAD_TLINEAR_ENABLE_STATE,
+                             (LEP_ATTRIBUTE_T_PTR)&enableState,
+                             attributeWordLength);
+   return(result);
+}
+
+LEP_RESULT LEP_GetRadTLinearResolution(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                       LEP_RAD_TLINEAR_RESOLUTION_E_PTR resolutionPtr)
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2;
+
+   if(resolutionPtr == NULL)
    {
       return(LEP_BAD_ARG_POINTER_ERROR);
    }
 
    result = LEP_GetAttribute(portDescPtr,
-                             (LEP_COMMAND_ID)LEP_CID_RAD_SNF_SCALE_FACTOR,
-                             (LEP_ATTRIBUTE_T_PTR)scaleFactorPtr,
+                             (LEP_COMMAND_ID)LEP_CID_RAD_TLINEAR_RESOLUTION,
+                             (LEP_ATTRIBUTE_T_PTR)resolutionPtr,
                              attributeWordLength);
-
    return(result);
+}
+
+LEP_RESULT LEP_SetRadTLinearResolution(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                       LEP_RAD_TLINEAR_RESOLUTION_E resolution)
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2;
+
+   result = LEP_SetAttribute(portDescPtr,
+                             (LEP_COMMAND_ID)LEP_CID_RAD_TLINEAR_RESOLUTION,
+                             (LEP_ATTRIBUTE_T_PTR)&resolution,
+                             attributeWordLength);
+   return(result);
+}
+
+LEP_RESULT LEP_GetRadTLinearAutoResolution(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                           LEP_RAD_ENABLE_E_PTR enableStatePtr)
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2;
+
+   if(enableStatePtr == NULL)
+   {
+      return(LEP_BAD_ARG_POINTER_ERROR);
+   }
+
+   result = LEP_GetAttribute(portDescPtr,
+                             (LEP_COMMAND_ID)LEP_CID_RAD_TLINEAR_AUTO_RESOLUTION,
+                             (LEP_ATTRIBUTE_T_PTR)enableStatePtr,
+                             attributeWordLength);
+   return(result);
+}
+LEP_RESULT LEP_SetRadTLinearAutoResolution(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                           LEP_RAD_ENABLE_E enableState)
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2;
+
+   result = LEP_SetAttribute(portDescPtr,
+                             (LEP_COMMAND_ID)LEP_CID_RAD_TLINEAR_AUTO_RESOLUTION,
+                             (LEP_ATTRIBUTE_T_PTR)&enableState,
+                             attributeWordLength);
+   return(result);
+}
+
+LEP_RESULT LEP_GetRadSpotmeterRoi(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                  LEP_RAD_ROI_T_PTR spotmeterRoiPtr)
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 4;
+
+   if(spotmeterRoiPtr == NULL)
+   {
+      return(LEP_BAD_ARG_POINTER_ERROR);
+   }
+
+   result = LEP_GetAttribute(portDescPtr,
+                             (LEP_COMMAND_ID)LEP_CID_RAD_SPOTMETER_ROI,
+                             (LEP_ATTRIBUTE_T_PTR)spotmeterRoiPtr,
+                             attributeWordLength);
+   return(result);
+}
+
+LEP_RESULT LEP_SetRadSpotmeterRoi(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                  LEP_RAD_ROI_T spotmeterRoi)
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 4;
+
+   result = LEP_SetAttribute(portDescPtr,
+                             (LEP_COMMAND_ID)LEP_CID_RAD_SPOTMETER_ROI,
+                             (LEP_ATTRIBUTE_T_PTR)&spotmeterRoi,
+                             attributeWordLength);
+   return(result);
+}
+
+LEP_RESULT LEP_GetRadSpotmeterObjInKelvinX100(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                              LEP_RAD_SPOTMETER_OBJ_KELVIN_T_PTR kelvinPtr)
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 4;
+
+   if(kelvinPtr == NULL)
+   {
+      return(LEP_BAD_ARG_POINTER_ERROR);
+   }
+
+   result = LEP_GetAttribute(portDescPtr,
+                             (LEP_COMMAND_ID)LEP_CID_RAD_SPOTMETER_OBJ_KELVIN,
+                             (LEP_ATTRIBUTE_T_PTR)kelvinPtr,
+                             attributeWordLength);
+   return(result);
+}
+
+LEP_RESULT LEP_GetRadArbitraryOffsetMode( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                          LEP_RAD_ARBITRARY_OFFSET_MODE_E_PTR arbitraryOffsetModePtr )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2;
+
+   if(arbitraryOffsetModePtr == NULL)
+   {
+      return(LEP_BAD_ARG_POINTER_ERROR);
+   }
+
+   result = LEP_GetAttribute(portDescPtr,
+                             (LEP_COMMAND_ID)LEP_CID_RAD_ARBITRARY_OFFSET_MODE,
+                             (LEP_ATTRIBUTE_T_PTR)arbitraryOffsetModePtr,
+                             attributeWordLength);
+   return(result);
+}
+
+LEP_RESULT LEP_SetRadArbitraryOffsetMode( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                          LEP_RAD_ARBITRARY_OFFSET_MODE_E arbitraryOffsetMode )
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2;
+
+   result = LEP_SetAttribute(portDescPtr,
+                             (LEP_COMMAND_ID)LEP_CID_RAD_ARBITRARY_OFFSET_MODE,
+                             (LEP_ATTRIBUTE_T_PTR)&arbitraryOffsetMode,
+                             attributeWordLength);
+   return(result);
+}
+
+LEP_RESULT LEP_GetRadArbitraryOffsetParams( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                            LEP_RAD_ARBITRARY_OFFSET_PARAMS_T_PTR arbitraryOffsetParamsPtr)
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2;
+
+   if(arbitraryOffsetParamsPtr == NULL)
+   {
+      return(LEP_BAD_ARG_POINTER_ERROR);
+   }
+
+   result = LEP_GetAttribute(portDescPtr,
+                             (LEP_COMMAND_ID)LEP_CID_RAD_ARBITRARY_OFFSET_PARAMS,
+                             (LEP_ATTRIBUTE_T_PTR)arbitraryOffsetParamsPtr,
+                             attributeWordLength);
+   return(result);
+
+}
+
+LEP_RESULT LEP_SetRadArbitraryOffsetParams( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                            LEP_RAD_ARBITRARY_OFFSET_PARAMS_T arbitraryOffsetParams)
+{
+   LEP_RESULT result = LEP_OK;
+   LEP_UINT16 attributeWordLength = 2;
+
+   result = LEP_SetAttribute(portDescPtr,
+                             (LEP_COMMAND_ID)LEP_CID_RAD_ARBITRARY_OFFSET_PARAMS,
+                             (LEP_ATTRIBUTE_T_PTR)&arbitraryOffsetParams,
+                             attributeWordLength);
+   return(result);
+}
+
+extern LEP_RESULT LEP_GetRadRadioCalValues( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                            LEP_RAD_RADIO_CAL_VALUES_T_PTR radRadioCalValuesPtr)
+{
+    LEP_RESULT result = LEP_OK;
+    LEP_UINT16 attributeWordLength = 4;
+
+    if(radRadioCalValuesPtr == NULL)
+    {
+       return(LEP_BAD_ARG_POINTER_ERROR);
+    }
+
+    result = LEP_GetAttribute(portDescPtr,
+                              (LEP_COMMAND_ID)LEP_CID_RAD_RADIO_CAL_VALUES,
+                              (LEP_ATTRIBUTE_T_PTR)radRadioCalValuesPtr,
+                              attributeWordLength);
+    return(result);
+}
+
+extern LEP_RESULT LEP_SetRadRadioCalValues( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                            LEP_RAD_RADIO_CAL_VALUES_T radRadioCalValues )
+{
+    LEP_RESULT result = LEP_OK;
+    LEP_UINT16 attributeWordLength = 4;
+
+    result = LEP_SetAttribute(portDescPtr,
+                              (LEP_COMMAND_ID)LEP_CID_RAD_RADIO_CAL_VALUES,
+                              (LEP_ATTRIBUTE_T_PTR)&radRadioCalValues,
+                              attributeWordLength);
+    return(result);
 }
 
 /******************************************************************************/

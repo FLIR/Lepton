@@ -71,12 +71,7 @@
 #include "LEPTON_Types.h"
 #include "LEPTON_ErrorCodes.h"
 #include "LEPTON_I2C_Service.h"
-#include "bbg_lepton_I2C.h"
-//#include "Lepton_Stm32_I2C.h"
-//#include "atxmega128a1_I2C.h"
-//#include "jova_I2C.h"
-//#include "aardvark_I2C.h"
-//#include "ftdi_I2C.h"
+#include "FLIR_I2C.h"
 
 /******************************************************************************/
 /** LOCAL DEFINES                                                            **/
@@ -106,10 +101,26 @@
 /** EXPORTED PUBLIC FUNCTIONS                                                **/
 /******************************************************************************/
 
+LEP_RESULT LEP_I2C_MasterSelectDevice(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr, 
+                                      LEP_PROTOCOL_DEVICE_E device)
+{
+    LEP_RESULT result = LEP_OK;
+
+    /* Do any device-specific calls to implement a close operation
+    */ 
+#ifdef IMPLEMENTS_SELECT_DEVICE
+	result = DEV_I2C_MasterSelectDevice(device);
+#else
+    result = LEP_UNDEFINED_FUNCTION_ERROR;
+#endif
+
+    return(result);
+}
+
 /* Driver Open
 */ 
 LEP_RESULT LEP_I2C_MasterOpen(LEP_UINT16 portID, 
-                              LEP_UINT32 *portBaudRate)
+                              LEP_UINT16 *portBaudRate)
 {
     LEP_RESULT result;
 

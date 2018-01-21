@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "bbg_lepton_I2C.h"
+#include "FLIR_I2C.h"
 
 #include "LEPTON_OEM.h"
 #include "LEPTON_SDK.h"

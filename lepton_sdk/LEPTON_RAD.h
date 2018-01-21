@@ -87,8 +87,8 @@ extern "C"
 
    #define LEP_RAD_MODULE_BASE                     0x4E00   // includes the OEM Bit set 0x4000
 
-   #define LEP_CID_RAD_RBFO_INTERNAL               (LEP_RAD_MODULE_BASE + 0x0000 )
-   #define LEP_CID_RAD_RBFO_EXTERNAL               (LEP_RAD_MODULE_BASE + 0x0004 )
+   #define LEP_CID_RAD_RBFO_INTERNAL               (LEP_RAD_MODULE_BASE + 0x0000 )  /* High Gain */
+   #define LEP_CID_RAD_RBFO_EXTERNAL               (LEP_RAD_MODULE_BASE + 0x0004 )  /* High Gain */
    #define LEP_CID_RAD_DEBUG_TEMP                  (LEP_RAD_MODULE_BASE + 0x0008 )
    #define LEP_CID_RAD_DEBUG_FLUX                  (LEP_RAD_MODULE_BASE + 0x000C )
    #define LEP_CID_RAD_ENABLE_STATE                (LEP_RAD_MODULE_BASE + 0x0010 )
@@ -112,10 +112,7 @@ extern "C"
    #define LEP_CID_RAD_TAUX_CTS                    (LEP_RAD_MODULE_BASE + 0x0058 )
    #define LEP_CID_RAD_TEQ_SHUTTER_FLUX            (LEP_RAD_MODULE_BASE + 0x005C )
    #define LEP_CID_RAD_MFFC_FLUX                   (LEP_RAD_MODULE_BASE + 0x0060 )
-
    #define LEP_CID_RAD_FRAME_MEDIAN_VALUE          (LEP_RAD_MODULE_BASE + 0x007C )
-   #define LEP_CID_RAD_TEQ_HOUSING_LUT             (LEP_RAD_MODULE_BASE + 0x0080 )
-   #define LEP_CID_RAD_TEQ_LENS_LUT                (LEP_RAD_MODULE_BASE + 0x0084 )
    #define LEP_CID_RAD_MLG_LUT                     (LEP_RAD_MODULE_BASE + 0x0088 )
    #define LEP_CID_RAD_THOUSING_TCP                (LEP_RAD_MODULE_BASE + 0x008C )
    #define LEP_CID_RAD_HOUSING_TCP                 (LEP_RAD_MODULE_BASE + 0x008C )
@@ -127,7 +124,22 @@ extern "C"
    #define LEP_CID_RAD_CNF_SCALE_FACTOR            (LEP_RAD_MODULE_BASE + 0x00A4 )
    #define LEP_CID_RAD_TNF_SCALE_FACTOR            (LEP_RAD_MODULE_BASE + 0x00A8 )
    #define LEP_CID_RAD_SNF_SCALE_FACTOR            (LEP_RAD_MODULE_BASE + 0x00AC )
+   #define LEP_CID_RAD_ARBITRARY_OFFSET            (LEP_RAD_MODULE_BASE + 0x00B8 )
 
+   #define LEP_CID_RAD_FLUX_LINEAR_PARAMS          (LEP_RAD_MODULE_BASE + 0x00BC)
+   #define LEP_CID_RAD_TLINEAR_ENABLE_STATE        (LEP_RAD_MODULE_BASE + 0x00C0)
+   #define LEP_CID_RAD_TLINEAR_RESOLUTION          (LEP_RAD_MODULE_BASE + 0x00C4)
+   #define LEP_CID_RAD_TLINEAR_AUTO_RESOLUTION     (LEP_RAD_MODULE_BASE + 0x00C8)
+   #define LEP_CID_RAD_SPOTMETER_ROI               (LEP_RAD_MODULE_BASE + 0x00CC)
+   #define LEP_CID_RAD_SPOTMETER_OBJ_KELVIN        (LEP_RAD_MODULE_BASE + 0x00D0)
+
+   #define LEP_CID_RAD_RBFO_INTERNAL_LG            (LEP_RAD_MODULE_BASE + 0x00D4 )  /* Low Gain */
+   #define LEP_CID_RAD_RBFO_EXTERNAL_LG            (LEP_RAD_MODULE_BASE + 0x00D8 )  /* Low Gain */
+
+   #define LEP_CID_RAD_ARBITRARY_OFFSET_MODE       (LEP_RAD_MODULE_BASE + 0x00DC)
+   #define LEP_CID_RAD_ARBITRARY_OFFSET_PARAMS     (LEP_RAD_MODULE_BASE + 0x00E0)
+
+   #define LEP_CID_RAD_RADIO_CAL_VALUES            (LEP_RAD_MODULE_BASE + 0x00E4)
 
 /******************************************************************************/
 /** EXPORTED TYPE DEFINITIONS                                                **/
@@ -141,6 +153,9 @@ typedef LEP_UINT16   LEP_RAD_FNUM_SHUTTER_T, *LEP_RAD_FNUM_SHUTTER_T_PTR;
 typedef LEP_UINT16   LEP_RAD_RADIOMETRY_FILTER_T, *LEP_RAD_RADIOMETRY_FILTER_T_PTR;
 typedef LEP_UINT16   LEP_RAD_MEDIAN_VALUE_T, *LEP_RAD_MEDIAN_VALUE_T_PTR;
 typedef LEP_UINT16   LEP_RAD_PARAMETER_SCALE_FACTOR_T, *LEP_RAD_PARAMETER_SCALE_FACTOR_T_PTR;
+typedef LEP_INT16    LEP_RAD_ARBITRARY_OFFSET_T, *LEP_RAD_ARBITRARY_OFFSET_T_PTR;
+typedef LEP_UINT16   LEP_RAD_SPOTMETER_KELVIN_T, *LEP_RAD_SPOTMETER_KELVIN_T_PTR;
+
 
 /* TFpa and TAux counts
 */
@@ -240,6 +255,72 @@ typedef enum
    LEP_RAD_STATUS_END
 
 } LEP_RAD_STATUS_E, *LEP_RAD_STATUS_E_PTR;
+
+typedef struct LEP_RAD_FLUX_LINEAR_PARAMS_T_TAG
+{
+   /* Type     Field name              format   default  range       comment*/
+   LEP_UINT16  sceneEmissivity;     /* 3.13     8192     [82, 8192] */
+   LEP_UINT16  TBkgK;               /* 16.0     30000    [, ]        value in kelvin 100x*/
+   LEP_UINT16  tauWindow;           /* 3.13     8192     [82, 8192] */
+   LEP_UINT16  TWindowK;            /* 16.0     30000    [, ]        value in kelvin 100x*/
+   LEP_UINT16  tauAtm;              /* 3.13     8192     [82, 8192] */
+   LEP_UINT16  TAtmK;               /* 16.0     30000    [, ]        value in kelvin 100x*/
+   LEP_UINT16  reflWindow;          /* 3.13     0        [0, 8192-tauWindow] */
+   LEP_UINT16  TReflK;              /* 16.0     30000    [, ]        value in kelvin 100x*/
+
+}LEP_RAD_FLUX_LINEAR_PARAMS_T, *LEP_RAD_FLUX_LINEAR_PARAMS_T_PTR;
+
+typedef enum LEP_RAD_TLINEAR_RESOLUTION_E_TAG
+{
+   LEP_RAD_RESOLUTION_0_1 = 0,
+   LEP_RAD_RESOLUTION_0_01,
+
+   LEP_RAD_END_RESOLUTION,
+} LEP_RAD_TLINEAR_RESOLUTION_E, *LEP_RAD_TLINEAR_RESOLUTION_E_PTR;
+
+typedef struct LEP_RAD_ROI_T_TAG
+{
+   LEP_UINT16 startRow;
+   LEP_UINT16 startCol;
+   LEP_UINT16 endRow;
+   LEP_UINT16 endCol;
+} LEP_RAD_ROI_T, *LEP_RAD_ROI_T_PTR;
+
+typedef enum LEP_RAD_ARBITRARY_OFFSET_MODE_E_TAG
+{
+   LEP_RAD_ARBITRARY_OFFSET_MODE_MANUAL = 0,
+   LEP_RAD_ARBITRARY_OFFSET_MODE_AUTO, 
+   LEP_RAD_END_ARBITRARY_OFFSET_MODE,
+
+} LEP_RAD_ARBITRARY_OFFSET_MODE_E, *LEP_RAD_ARBITRARY_OFFSET_MODE_E_PTR;
+
+typedef struct LEP_RAD_ARBITRARY_OFFSET_PARAMS_T_TAG
+{
+   LEP_INT16 amplitude;
+   LEP_UINT16 decay;
+
+} LEP_RAD_ARBITRARY_OFFSET_PARAMS_T, *LEP_RAD_ARBITRARY_OFFSET_PARAMS_T_PTR;
+
+
+typedef struct LEP_RAD_SPOTMETER_OBJ_KELVIN_T_TAG
+{
+    LEP_RAD_SPOTMETER_KELVIN_T  radSpotmeterValue;
+    LEP_UINT16                  radSpotmeterMaxValue;
+    LEP_UINT16                  radSpotmeterMinValue;
+    LEP_UINT16                  radSpotmeterPopulation;
+
+} LEP_RAD_SPOTMETER_OBJ_KELVIN_T, *LEP_RAD_SPOTMETER_OBJ_KELVIN_T_PTR;
+
+typedef struct LEP_RAD_RADIO_CAL_VALUES_T_TAG
+{
+   
+   LEP_RAD_TEMPERATURE_COUNTS_T  radTauxCounts;
+   LEP_RAD_TEMPERATURE_COUNTS_T  radTfpaCounts;
+
+   LEP_RAD_KELVIN_T              radTauxKelvin;
+   LEP_RAD_KELVIN_T              radTfpaKelvin;
+
+} LEP_RAD_RADIO_CAL_VALUES_T, *LEP_RAD_RADIO_CAL_VALUES_T_PTR;
 
 /******************************************************************************/
 /** EXPORTED PUBLIC DATA DECLARATIONS                                        **/
@@ -405,67 +486,135 @@ extern LEP_RESULT LEP_GetRadMffcFlux( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
 extern LEP_RESULT LEP_SetRadMffcFlux( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
                                       LEP_RAD_FLUX_T radRadMffcFlux );
 
-extern LEP_RESULT LEP_GetRadFrameMedianPixelValue(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                                  LEP_RAD_MEDIAN_VALUE_T_PTR frameMedianPtr);
+extern LEP_RESULT LEP_GetRadFrameMedianPixelValue( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                   LEP_RAD_MEDIAN_VALUE_T_PTR frameMedianPtr );
 
-extern LEP_RESULT LEP_GetRadTEqLensLut(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                       LEP_RAD_LUT128_T_PTR radTEqLensLutPtr);
+extern LEP_RESULT LEP_GetRadMLGLut( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                    LEP_RAD_SIGNED_LUT128_T_PTR radMLGLutPtr );
 
-extern LEP_RESULT LEP_SetRadTEqLensLut(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                       LEP_RAD_LUT128_T_PTR radTEqLensLutPtr);
+extern LEP_RESULT LEP_SetRadMLGLut( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                    LEP_RAD_SIGNED_LUT128_T_PTR radMLGLutPtr );
 
-extern LEP_RESULT LEP_GetRadTEqHousingLut(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                          LEP_RAD_LUT128_T_PTR radTEqHousingLutPtr);
-
-extern LEP_RESULT LEP_SetRadTEqHousingLut(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                          LEP_RAD_LUT128_T_PTR radTEqHousingLutPtr);
-
-extern LEP_RESULT LEP_GetRadMLGLut(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                   LEP_RAD_SIGNED_LUT128_T_PTR radMLGLutPtr);
-
-extern LEP_RESULT LEP_SetRadMLGLut(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                   LEP_RAD_SIGNED_LUT128_T_PTR radMLGLutPtr);
-
-#if USE_DEPRECATED_HOUSING_TCP_INTERFACE
+   #if USE_DEPRECATED_HOUSING_TCP_INTERFACE
 extern LEP_RESULT LEP_GetRadTHousingTcp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
                                          LEP_RAD_LINEAR_TEMP_CORRECTION_T_PTR radHousingTcp );
 extern LEP_RESULT LEP_SetRadTHousingTcp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
                                          LEP_RAD_LINEAR_TEMP_CORRECTION_T radHousingTcp );
-#else
+   #else
 extern LEP_RESULT LEP_GetRadHousingTcp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
                                         LEP_RAD_LINEAR_TEMP_CORRECTION_T_PTR radHousingTcp );
 extern LEP_RESULT LEP_SetRadHousingTcp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
                                         LEP_RAD_LINEAR_TEMP_CORRECTION_T radHousingTcp );
-#endif
+   #endif
 
 
 extern LEP_RESULT LEP_GetRadShutterTcp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                      LEP_RAD_LINEAR_TEMP_CORRECTION_T_PTR radShutterTcp );
+                                        LEP_RAD_LINEAR_TEMP_CORRECTION_T_PTR radShutterTcp );
 
 extern LEP_RESULT LEP_SetRadShutterTcp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                      LEP_RAD_LINEAR_TEMP_CORRECTION_T radShutterTcp );
+                                        LEP_RAD_LINEAR_TEMP_CORRECTION_T radShutterTcp );
 
 extern LEP_RESULT LEP_GetRadLensTcp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                      LEP_RAD_LINEAR_TEMP_CORRECTION_T_PTR radLensTcp );
+                                     LEP_RAD_LINEAR_TEMP_CORRECTION_T_PTR radLensTcp );
 
 extern LEP_RESULT LEP_SetRadLensTcp( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                      LEP_RAD_LINEAR_TEMP_CORRECTION_T radLensTcp );
+                                     LEP_RAD_LINEAR_TEMP_CORRECTION_T radLensTcp );
 
-extern LEP_RESULT LEP_GetRadPreviousGlobalOffset(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                                 LEP_RAD_GLOBAL_OFFSET_T_PTR globalOffsetPtr);
+extern LEP_RESULT LEP_GetRadPreviousGlobalOffset( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                  LEP_RAD_GLOBAL_OFFSET_T_PTR globalOffsetPtr );
 
-extern LEP_RESULT LEP_GetRadPreviousGlobalGain(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                               LEP_RAD_GLOBAL_GAIN_T_PTR globalGainPtr);
+extern LEP_RESULT LEP_GetRadPreviousGlobalGain( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                LEP_RAD_GLOBAL_GAIN_T_PTR globalGainPtr );
 
-extern LEP_RESULT LEP_GetGlobalGainFFC(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                       LEP_RAD_GLOBAL_GAIN_T_PTR globalGainFfcPtr);
+extern LEP_RESULT LEP_GetGlobalGainFFC( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                        LEP_RAD_GLOBAL_GAIN_T_PTR globalGainFfcPtr );
 
-extern LEP_RESULT LEP_GetRadCnfScaleFactor(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                           LEP_RAD_PARAMETER_SCALE_FACTOR_T_PTR scaleFactorPtr);
-extern LEP_RESULT LEP_GetRadTnfScaleFactor(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                           LEP_RAD_PARAMETER_SCALE_FACTOR_T_PTR scaleFactorPtr);
-extern LEP_RESULT LEP_GetRadSnfScaleFactor(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                           LEP_RAD_PARAMETER_SCALE_FACTOR_T_PTR scaleFactorPtr);
+extern LEP_RESULT LEP_GetRadCnfScaleFactor( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                            LEP_RAD_PARAMETER_SCALE_FACTOR_T_PTR scaleFactorPtr );
+extern LEP_RESULT LEP_GetRadTnfScaleFactor( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                            LEP_RAD_PARAMETER_SCALE_FACTOR_T_PTR scaleFactorPtr );
+extern LEP_RESULT LEP_GetRadSnfScaleFactor( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                            LEP_RAD_PARAMETER_SCALE_FACTOR_T_PTR scaleFactorPtr );
+
+extern LEP_RESULT LEP_GetRadArbitraryOffset( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                             LEP_RAD_ARBITRARY_OFFSET_T_PTR arbitraryOffsetPtr );
+extern LEP_RESULT LEP_SetRadArbitraryOffset( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                             LEP_RAD_ARBITRARY_OFFSET_T arbitraryOffset );
+
+extern LEP_RESULT LEP_GetRadFluxLinearParams( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                              LEP_RAD_FLUX_LINEAR_PARAMS_T_PTR fluxParamsPtr );
+
+extern LEP_RESULT LEP_SetRadFluxLinearParams( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                              LEP_RAD_FLUX_LINEAR_PARAMS_T fluxParams );
+
+extern LEP_RESULT LEP_GetRadTLinearEnableState( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                LEP_RAD_ENABLE_E_PTR enableStatePtr );
+
+extern LEP_RESULT LEP_SetRadTLinearEnableState( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                LEP_RAD_ENABLE_E enableState );
+
+extern LEP_RESULT LEP_GetRadTLinearResolution( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                               LEP_RAD_TLINEAR_RESOLUTION_E_PTR resolutionPtr );
+
+extern LEP_RESULT LEP_SetRadTLinearResolution( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                               LEP_RAD_TLINEAR_RESOLUTION_E resolution );
+
+extern LEP_RESULT LEP_GetRadTLinearAutoResolution( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                   LEP_RAD_ENABLE_E_PTR enableStatePtr );
+
+extern LEP_RESULT LEP_SetRadTLinearAutoResolution( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                   LEP_RAD_ENABLE_E enableState );
+
+extern LEP_RESULT LEP_GetRadSpotmeterRoi( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                          LEP_RAD_ROI_T_PTR spotmeterRoiPtr );
+
+extern LEP_RESULT LEP_SetRadSpotmeterRoi( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                          LEP_RAD_ROI_T spotmeterRoi );
+
+extern LEP_RESULT LEP_GetRadSpotmeterObjInKelvinX100( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                      LEP_RAD_SPOTMETER_OBJ_KELVIN_T_PTR kelvinPtr );
+
+extern LEP_RESULT LEP_GetRadArbitraryOffsetMode( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                 LEP_RAD_ARBITRARY_OFFSET_MODE_E_PTR arbitraryOffsetModePtr );
+
+extern LEP_RESULT LEP_SetRadArbitraryOffsetMode( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                 LEP_RAD_ARBITRARY_OFFSET_MODE_E arbitraryOffsetMode );
+
+extern LEP_RESULT LEP_GetRadArbitraryOffsetParams( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                   LEP_RAD_ARBITRARY_OFFSET_PARAMS_T_PTR arbitraryOffsetParamsPtr);
+
+extern LEP_RESULT LEP_SetRadArbitraryOffsetParams( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                   LEP_RAD_ARBITRARY_OFFSET_PARAMS_T arbitraryOffsetParams);
+
+extern LEP_RESULT LEP_GetRadInternalRBFOHighGain( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                  LEP_RBFO_T_PTR radRBFOPtr );
+
+extern LEP_RESULT LEP_SetRadInternalRBFOHighGain( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                  LEP_RBFO_T_PTR radRBFOPtr );
+
+extern LEP_RESULT LEP_GetRadExternalRBFOHighGain( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                  LEP_RBFO_T_PTR radRBFOPtr );
+
+extern LEP_RESULT LEP_SetRadExternalRBFOHighGain( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                  LEP_RBFO_T_PTR radRBFOPtr );
+
+extern LEP_RESULT LEP_GetRadInternalRBFOLowGain( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                 LEP_RBFO_T_PTR radRBFOPtr );
+
+extern LEP_RESULT LEP_SetRadInternalRBFOLowGain( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                 LEP_RBFO_T_PTR radRBFOPtr );
+
+extern LEP_RESULT LEP_GetRadExternalRBFOLowGain( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                 LEP_RBFO_T_PTR radRBFOPtr );
+
+extern LEP_RESULT LEP_SetRadExternalRBFOLowGain( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                                 LEP_RBFO_T_PTR radRBFOPtr ); 
+
+extern LEP_RESULT LEP_GetRadRadioCalValues( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                            LEP_RAD_RADIO_CAL_VALUES_T_PTR radRadioCalValuesPtr);
+
+extern LEP_RESULT LEP_SetRadRadioCalValues( LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
+                                            LEP_RAD_RADIO_CAL_VALUES_T radRadioCalValues );
 
 /******************************************************************************/
    #ifdef __cplusplus

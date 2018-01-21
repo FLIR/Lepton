@@ -5,16 +5,16 @@
 **      AUTHOR:  David Dart
 **
 **      CREATED: 5/3/2012
+**  
+**      DESCRIPTION: Lepton I2C Protocol Layer 
 **
-**      DESCRIPTION: Lepton I2C Protocol Layer
-**
-**      HISTORY:  5/3/2012 DWD - Initial Draft
+**      HISTORY:  5/3/2012 DWD - Initial Draft 
 **
 **      Copyright 2011,2012,2013,2014 FLIR Systems - Commercial
 **      Vision Systems.  All rights reserved.
 **
 **      Proprietary - PROPRIETARY - FLIR Systems Inc..
-**
+**  
 **      This document is controlled to FLIR Technology Level 2.
 **      The information contained in this document pertains to a
 **      dual use product Controlled for export by the Export
@@ -94,9 +94,18 @@
 /** EXPORTED PUBLIC FUNCTIONS                                                **/
 /******************************************************************************/
 
+LEP_RESULT LEP_I2C_SelectDevice(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr, 
+                                LEP_PROTOCOL_DEVICE_E device)
+{
+    LEP_RESULT result;
+
+    result = LEP_I2C_MasterSelectDevice( portDescPtr, device );
+
+    return(result);
+}
 
 LEP_RESULT LEP_I2C_OpenPort(LEP_UINT16 portID,
-                            LEP_UINT32 *baudRateInkHz,
+                            LEP_UINT16 *baudRateInkHz,
                             LEP_UINT8* deviceAddress)
 {
    LEP_RESULT result;
@@ -108,22 +117,20 @@ LEP_RESULT LEP_I2C_OpenPort(LEP_UINT16 portID,
       return(LEP_COMM_INVALID_PORT_ERROR);
    }
 
-   #if 0
-   *deviceAddress = 0x00;
+   *deviceAddress = 0x2a;
    result = LEP_I2C_MasterReadData( portID,
                                 *deviceAddress,
                                 LEP_I2C_STATUS_REG,
                                 &statusReg,
                                 1 );
-
+   
    if(result != LEP_OK)
-   #endif
    {
       /*
-       *    Try 0x2A as the device address if 0x00 didn't work. In this case, we are in Virgin Boot Mode.
+       *    Try 0x00 as the device address if 0x2a didn't work. In this case, we are in Virgin Boot Mode.
        *
        */
-      *deviceAddress = 0x2A;
+      *deviceAddress = 0x00;
       result = LEP_I2C_MasterReadData( portID,
                                    *deviceAddress,
                                    LEP_I2C_STATUS_REG,
@@ -160,7 +167,7 @@ LEP_RESULT LEP_I2C_ResetPort(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr)
 
 
 LEP_RESULT LEP_I2C_GetAttribute(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                LEP_COMMAND_ID commandID,
+                                LEP_COMMAND_ID commandID, 
                                 LEP_ATTRIBUTE_T_PTR attributePtr,
                                 LEP_UINT16 attributeWordLength)
 {
@@ -175,12 +182,12 @@ LEP_RESULT LEP_I2C_GetAttribute(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
     /* First wait until the Camera is ready to receive a new
     ** command by polling the STATUS REGISTER BUSY Bit until it
     ** reports NOT BUSY.
-    */
+    */ 
 
     do
     {
         /* Read the Status REGISTER and peek at the BUSY Bit
-        */
+        */ 
         result = LEP_I2C_MasterReadData( portDescPtr->portID,
                                          portDescPtr->deviceAddress,
                                          LEP_I2C_STATUS_REG,
@@ -196,22 +203,22 @@ LEP_RESULT LEP_I2C_GetAttribute(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
 
     /* Set the Lepton's DATA LENGTH REGISTER first to inform the
     ** Lepton Camera how many 16-bit DATA words we want to read.
-    */
+    */ 
     result = LEP_I2C_MasterWriteData( portDescPtr->portID,
                                       portDescPtr->deviceAddress,
-                                      LEP_I2C_DATA_LENGTH_REG,
-                                      &attributeWordLength,
+                                      LEP_I2C_DATA_LENGTH_REG, 
+                                      &attributeWordLength, 
                                       1);
     if(result != LEP_OK)
     {
        return(result);
     }
     /* Now issue the GET Attribute Command
-    */
+    */ 
     result = LEP_I2C_MasterWriteData( portDescPtr->portID,
                                       portDescPtr->deviceAddress,
-                                      LEP_I2C_COMMAND_REG,
-                                      &commandID,
+                                      LEP_I2C_COMMAND_REG, 
+                                      &commandID, 
                                       1);
 
     if(result != LEP_OK)
@@ -222,11 +229,11 @@ LEP_RESULT LEP_I2C_GetAttribute(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
     /* Now wait until the Camera has completed this command by
     ** polling the statusReg REGISTER BUSY Bit until it reports NOT
     ** BUSY.
-    */
+    */ 
     do
     {
         /* Read the statusReg REGISTER and peek at the BUSY Bit
-        */
+        */ 
         result = LEP_I2C_MasterReadData( portDescPtr->portID,
                                          portDescPtr->deviceAddress,
                                          LEP_I2C_STATUS_REG,
@@ -240,10 +247,10 @@ LEP_RESULT LEP_I2C_GetAttribute(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
         done = (statusReg & LEP_I2C_STATUS_BUSY_BIT_MASK)? 0: 1;
 
     }while( !done );
-
+    
 
     /* Check statusReg word for Errors?
-    */
+    */ 
     statusCode = (statusReg >> 8) ? ((statusReg >> 8) | 0xFF00) : 0;
     if(statusCode)
     {
@@ -251,12 +258,12 @@ LEP_RESULT LEP_I2C_GetAttribute(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
     }
 
     /* If NO Errors then READ the DATA from the DATA REGISTER(s)
-    */
+    */ 
     if( attributeWordLength <= 16 )
     {
         /* Read from the DATA Registers - always start from DATA 0
         ** Little Endean
-        */
+        */ 
         result = LEP_I2C_MasterReadData(portDescPtr->portID,
                                         portDescPtr->deviceAddress,
                                         LEP_I2C_DATA_0_REG,
@@ -266,7 +273,7 @@ LEP_RESULT LEP_I2C_GetAttribute(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
     else if( attributeWordLength <= 1024 )
     {
         /* Read from the DATA Block Buffer
-        */
+        */ 
       result = LEP_I2C_MasterReadData(portDescPtr->portID,
                                       portDescPtr->deviceAddress,
                                       LEP_I2C_DATA_BUFFER_0,
@@ -289,16 +296,16 @@ LEP_RESULT LEP_I2C_GetAttribute(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
        {
           return(LEP_CHECKSUM_ERROR);
        }
-
+       
     }
-
+	
 
     return(result);
 }
 
 
 LEP_RESULT LEP_I2C_SetAttribute(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
-                                LEP_COMMAND_ID commandID,
+                                LEP_COMMAND_ID commandID, 
                                 LEP_ATTRIBUTE_T_PTR attributePtr,
                                 LEP_UINT16 attributeWordLength)
 {
@@ -313,11 +320,11 @@ LEP_RESULT LEP_I2C_SetAttribute(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
     /* First wait until the Camera is ready to receive a new
     ** command by polling the STATUS REGISTER BUSY Bit until it
     ** reports NOT BUSY.
-    */
+    */ 
     do
     {
         /* Read the Status REGISTER and peek at the BUSY Bit
-        */
+        */ 
         result = LEP_I2C_MasterReadData( portDescPtr->portID,
                                          portDescPtr->deviceAddress,
                                          LEP_I2C_STATUS_REG,
@@ -332,7 +339,7 @@ LEP_RESULT LEP_I2C_SetAttribute(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
         if( timeoutCount-- == 0 )
         {
             /* Timed out waiting for command busy to go away
-            */
+            */ 
           return(LEP_TIMEOUT_ERROR);
 
         }
@@ -341,11 +348,11 @@ LEP_RESULT LEP_I2C_SetAttribute(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
     if( result == LEP_OK )
     {
         /* Now WRITE the DATA to the DATA REGISTER(s)
-        */
+        */ 
         if( attributeWordLength <= 16 )
         {
             /* WRITE to the DATA Registers - always start from DATA 0
-            */
+            */ 
             result = LEP_I2C_MasterWriteData(portDescPtr->portID,
                                              portDescPtr->deviceAddress,
                                              LEP_I2C_DATA_0_REG,
@@ -355,7 +362,7 @@ LEP_RESULT LEP_I2C_SetAttribute(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
         else if( attributeWordLength <= 1024 )
         {
             /* WRITE to the DATA Block Buffer
-            */
+            */     
             result = LEP_I2C_MasterWriteData(portDescPtr->portID,
                                              portDescPtr->deviceAddress,
                                              LEP_I2C_DATA_BUFFER_0,
@@ -371,33 +378,33 @@ LEP_RESULT LEP_I2C_SetAttribute(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
     {
         /* Set the Lepton's DATA LENGTH REGISTER first to inform the
         ** Lepton Camera how many 16-bit DATA words we want to read.
-        */
+        */ 
         result = LEP_I2C_MasterWriteData( portDescPtr->portID,
                                           portDescPtr->deviceAddress,
-                                          LEP_I2C_DATA_LENGTH_REG,
-                                          &attributeWordLength,
+                                          LEP_I2C_DATA_LENGTH_REG, 
+                                          &attributeWordLength, 
                                           1);
 
         if( result == LEP_OK )
         {
             /* Now issue the SET Attribute Command
-            */
+            */ 
             result = LEP_I2C_MasterWriteData( portDescPtr->portID,
                                               portDescPtr->deviceAddress,
-                                              LEP_I2C_COMMAND_REG,
-                                              &commandID,
+                                              LEP_I2C_COMMAND_REG, 
+                                              &commandID, 
                                               1);
-
+			
             if( result == LEP_OK )
             {
                 /* Now wait until the Camera has completed this command by
                 ** polling the statusReg REGISTER BUSY Bit until it reports NOT
                 ** BUSY.
-                */
+                */ 
                 do
                 {
                     /* Read the statusReg REGISTER and peek at the BUSY Bit
-                    */
+                    */ 
                     result = LEP_I2C_MasterReadData( portDescPtr->portID,
                                                      portDescPtr->deviceAddress,
                                                      LEP_I2C_STATUS_REG,
@@ -412,7 +419,7 @@ LEP_RESULT LEP_I2C_SetAttribute(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
                 }while( !done );
 
                     /* Check statusReg word for Errors?
-                   */
+                   */ 
                    statusCode = (statusReg >> 8) ? ((statusReg >> 8) | 0xFF00) : 0;
                    if(statusCode)
                    {
@@ -444,11 +451,11 @@ LEP_RESULT LEP_I2C_RunCommand(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
     /* First wait until the Camera is ready to receive a new
     ** command by polling the STATUS REGISTER BUSY Bit until it
     ** reports NOT BUSY.
-    */
+    */ 
     do
     {
         /* Read the Status REGISTER and peek at the BUSY Bit
-        */
+        */ 
         result = LEP_I2C_MasterReadRegister( portDescPtr->portID,
                                              portDescPtr->deviceAddress,
                                              LEP_I2C_STATUS_REG,
@@ -462,7 +469,7 @@ LEP_RESULT LEP_I2C_RunCommand(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
         if( timeoutCount-- == 0 )
         {
             /* Timed out waiting for command busy to go away
-            */
+            */ 
 
         }
     }while( !done );
@@ -471,30 +478,30 @@ LEP_RESULT LEP_I2C_RunCommand(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
     {
         /* Set the Lepton's DATA LENGTH REGISTER first to inform the
         ** Lepton Camera no 16-bit DATA words being transferred.
-        */
+        */ 
         result = LEP_I2C_MasterWriteRegister( portDescPtr->portID,
                                               portDescPtr->deviceAddress,
-                                              LEP_I2C_DATA_LENGTH_REG,
+                                              LEP_I2C_DATA_LENGTH_REG, 
                                               (LEP_UINT16)0);
 
         if( result == LEP_OK )
         {
             /* Now issue the Run Command
-            */
+            */ 
             result = LEP_I2C_MasterWriteRegister( portDescPtr->portID,
                                                   portDescPtr->deviceAddress,
-                                                  LEP_I2C_COMMAND_REG,
+                                                  LEP_I2C_COMMAND_REG, 
                                                   commandID);
             if( result == LEP_OK )
             {
                 /* Now wait until the Camera has completed this command by
                 ** polling the statusReg REGISTER BUSY Bit until it reports NOT
                 ** BUSY.
-                */
+                */ 
                 do
                 {
                     /* Read the statusReg REGISTER and peek at the BUSY Bit
-                    */
+                    */ 
                     result = LEP_I2C_MasterReadRegister( portDescPtr->portID,
                                                          portDescPtr->deviceAddress,
                                                          LEP_I2C_STATUS_REG,
@@ -520,7 +527,7 @@ LEP_RESULT LEP_I2C_RunCommand(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
     /* Check statusReg word for Errors?
     */
 
-
+    
     return(result);
 }
 
@@ -567,14 +574,14 @@ LEP_RESULT LEP_I2C_DirectWriteBuffer(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
    LEP_RESULT result = LEP_OK;
 
    /* WRITE to the DATA Block Buffer
-   */
+   */     
    result = LEP_I2C_MasterWriteData(portDescPtr->portID,
                                     portDescPtr->deviceAddress,
                                     LEP_I2C_DATA_BUFFER_0,
                                     attributePtr,
                                     attributeWordLength );
 
-
+  
 
    return(result);
 }
@@ -587,7 +594,7 @@ LEP_RESULT LEP_I2C_DirectWriteRegister(LEP_CAMERA_PORT_DESC_T_PTR portDescPtr,
 
    result = LEP_I2C_MasterWriteRegister(portDescPtr->portID,
                                         portDescPtr->deviceAddress,
-                                        regAddress,
+                                        regAddress, 
                                         regValue);
    return(result);
 }

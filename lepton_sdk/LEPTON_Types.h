@@ -77,11 +77,11 @@ extern "C"
     #endif      
 
     #if defined(_WIN32) || defined (_WIN64) 
-//       #include <windows.h> 
+       #include <windows.h> 
        #define WINDOWSS 1;
     #else
        #include <stdlib.h>
-//       #include <stdbool.h>
+       #include <stdbool.h>
     #endif
     
 /******************************************************************************/
@@ -208,6 +208,22 @@ extern "C"
         LEP_CCI_SPI,
         LEP_END_CCI_PORTS
     }LEP_CAMERA_PORT_E, *LEP_CAMERA_PORT_E_PTR;
+
+    /* Device entries
+    */
+    typedef enum LEP_PROTOCOL_DEVICE_E_TAG
+    {
+        /* I2C Devices */
+        AARDVARK_I2C = 0,
+        DEV_BOARD_FTDI_V2,
+        BEAGLEBONE_GREEN_I2C,
+        //C232HM_DDHSL_0,
+		TCP_IP,
+
+        /* SPI Devices */
+
+        LEP_END_PROTOCOL_DEVICE,
+    } LEP_PROTOCOL_DEVICE_E, *LEP_PROTOCOL_DEVICE_E_PTR;
 
     /* Lepton supported TWI  clock rates
     */ 
