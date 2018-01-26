@@ -1,0 +1,2 @@
+obj-m := FLIR_Lepton.o
+
