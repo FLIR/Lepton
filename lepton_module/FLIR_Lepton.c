@@ -11,6 +11,8 @@
 #include <linux/types.h>
 #include <linux/cdev.h>
 #include <linux/slab.h>
+#include <linux/interrupt.h>
+#include <linux/of_irq.h>
 #include <linux/spi/spi.h>
 #include <asm/uaccess.h>
 
@@ -122,9 +124,41 @@ int lepton_release(struct inode *inode, struct file *filp)
     return 0;
 }
 
+static irqreturn_t lepton_vsync_handler(int irq, void *data)
+{
+	pr_info("VSYNC");
+
+    return 0;
+}
+
 static int lepton_probe(struct spi_device *spi)
 {
+	struct device *dev = NULL;
+	struct device_node *of_node = NULL;
+	int ret, irq = -1;
+
+    dev = &spi->dev;
+	of_node = dev->of_node;
+
 	/* @@ set up character device, configure spi, dma buffers, assign interrupt handler */
+
+	if (!of_node) {
+		dev_err(dev, "missing device tree entry");
+		return -EINVAL;
+	}
+
+	irq = irq_of_parse_and_map(of_node, 0);
+	if (irq < 0) {
+		dev_err(dev, "failed to map irq");
+		return -EINVAL;
+	}
+
+    ret = devm_request_irq(dev, irq, lepton_vsync_handler, 0, dev_name(dev), spi);
+	if (ret) {
+		dev_err(dev, "failed to register irq");
+		return ret;
+	}
+
 	return 0;
 }
 
