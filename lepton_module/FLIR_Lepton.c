@@ -24,7 +24,7 @@ enum lepton_model {
 };
 
 struct _lepton_dev {
-    int telemetry_enabled;
+	int telemetry_enabled;
 } lepton_dev;
 
 ssize_t lepton_read(struct file *, char __user *, size_t, loff_t *);
@@ -38,36 +38,36 @@ static int lepton_remove(struct spi_device *spi);
  */
 
 static struct file_operations lepton_fops = {
-    .owner =    THIS_MODULE,
-    .llseek =   NULL,
-    .read =     lepton_read,
-    .write =    NULL,
-    .unlocked_ioctl =    NULL,
-    .open =     lepton_open,
-    .release =  lepton_release,
+	.owner =    THIS_MODULE,
+	.llseek =   NULL,
+	.read =     lepton_read,
+	.write =    NULL,
+	.unlocked_ioctl =    NULL,
+	.open =     lepton_open,
+	.release =  lepton_release,
 };
 
 int lepton_open(struct inode *inode, struct file *filp)
 {
 
-    filp->private_data = &lepton_dev;
-    if ((filp->f_flags & O_ACCMODE) == O_WRONLY) {
+	filp->private_data = &lepton_dev;
+	if ((filp->f_flags & O_ACCMODE) == O_WRONLY) {
 		// This device isn't writable
-        return -EINVAL;
-    }
-    return 0;
+		return -EINVAL;
+	}
+	return 0;
 }
 
 ssize_t lepton_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
 {
-    struct lepton_dev *leptondev;
-    leptondev = filp->private_data;
-    return 0;
+	struct lepton_dev *leptondev;
+	leptondev = filp->private_data;
+	return 0;
 }
 
 int lepton_release(struct inode *inode, struct file *filp)
 {
-    return 0;
+	return 0;
 }
 
 /*
@@ -109,7 +109,7 @@ static irqreturn_t lepton_vsync_handler(int irq, void *data)
 
 	pr_info("VSYNC %d", vsync_count);
 
-    return 0;
+	return 0;
 }
 
 static int lepton_probe(struct spi_device *spi)
@@ -118,7 +118,7 @@ static int lepton_probe(struct spi_device *spi)
 	struct device_node *of_node = NULL;
 	int ret, irq = -1;
 
-    dev = &spi->dev;
+	dev = &spi->dev;
 	of_node = dev->of_node;
 
 	/* @@ configure spi, dma buffers */
@@ -137,7 +137,7 @@ static int lepton_probe(struct spi_device *spi)
 		return -EINVAL;
 	}
 
-    ret = devm_request_irq(dev, irq, lepton_vsync_handler, 0, dev_name(dev), spi);
+	ret = devm_request_irq(dev, irq, lepton_vsync_handler, 0, dev_name(dev), spi);
 	if (ret) {
 		dev_err(dev, "failed to register irq");
 		return ret;
@@ -167,29 +167,29 @@ static struct spi_driver lepton_spi_driver = {
 };
 
 static int lepton_init(void) {
-    int status;
+	int status;
 
 	/* character device for sending data to userspace */
 
-    status = register_chrdev(lepton_major, "lepton", &lepton_fops);
-    if (status < 0)
-        return status;
+	status = register_chrdev(lepton_major, "lepton", &lepton_fops);
+	if (status < 0)
+		return status;
 
 	/* SPI for getting the video data from lepton */
 
-    status = spi_register_driver(&lepton_spi_driver);
-    if (status < 0)
-    {
-        unregister_chrdev(lepton_major, lepton_spi_driver.driver.name);
-    }
-    return status;
+	status = spi_register_driver(&lepton_spi_driver);
+	if (status < 0)
+	{
+		unregister_chrdev(lepton_major, lepton_spi_driver.driver.name);
+	}
+	return status;
 }
 module_init(lepton_init);
 
 static void __exit lepton_exit(void)
 {
-    spi_unregister_driver(&lepton_spi_driver);
-    unregister_chrdev(lepton_major, lepton_spi_driver.driver.name);
+	spi_unregister_driver(&lepton_spi_driver);
+	unregister_chrdev(lepton_major, lepton_spi_driver.driver.name);
 }
 module_exit(lepton_exit);
 
