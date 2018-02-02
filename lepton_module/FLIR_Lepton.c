@@ -23,11 +23,19 @@ enum lepton_model {
 	FLIR_LEPTON3	= 3,
 };
 
+struct _lepton_dev {
+    int telemetry_enabled;
+} lepton_dev;
+
 ssize_t lepton_read(struct file *, char __user *, size_t, loff_t *);
 int lepton_open(struct inode *inode, struct file *filp);
 int lepton_release(struct inode *inode, struct file *filp);
 static int lepton_probe(struct spi_device *spi);
 static int lepton_remove(struct spi_device *spi);
+
+/*
+ * interface to userspace apps: character device
+ */
 
 static struct file_operations lepton_fops = {
     .owner =    THIS_MODULE,
@@ -38,6 +46,36 @@ static struct file_operations lepton_fops = {
     .open =     lepton_open,
     .release =  lepton_release,
 };
+
+int lepton_open(struct inode *inode, struct file *filp)
+{
+
+    filp->private_data = &lepton_dev;
+    if ((filp->f_flags & O_ACCMODE) == O_WRONLY) {
+		// This device isn't writable
+        return -EINVAL;
+    }
+    return 0;
+}
+
+ssize_t lepton_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
+{
+    struct lepton_dev *leptondev;
+    leptondev = filp->private_data;
+    return 0;
+}
+
+int lepton_release(struct inode *inode, struct file *filp)
+{
+    return 0;
+}
+
+/*
+ * tables to find matching device-tree entries
+ *
+ * loaded device-tree will be searched for matching "compatible" strings,
+ * and driver probe function will be called on any matched nodes
+ */
 
 static const struct spi_device_id lepton_id_table[] = {
 	{
@@ -65,68 +103,11 @@ static const struct of_device_id lepton_of_match[] = {
 };
 MODULE_DEVICE_TABLE(of, lepton_of_match);
 
-static struct spi_driver lepton_spi_driver = {
-	.driver = {
-		.name	= "lepton",
-		.of_match_table	= lepton_of_match,
-	},
-	.id_table	= lepton_id_table,
-	.probe		= lepton_probe,
-	.remove		= lepton_remove,
-};
-
-struct _lepton_dev {
-    int telemetry_enabled;
-} lepton_dev;
-
-static int lepton_init(void) {
-    int status;
-
-    status = register_chrdev(lepton_major, "lepton", &lepton_fops);
-    if (status < 0)
-        return status;
-    status = spi_register_driver(&lepton_spi_driver);
-    if (status < 0)
-    {
-        unregister_chrdev(lepton_major, lepton_spi_driver.driver.name);
-    }
-    return status;
-}
-module_init(lepton_init);
-
-static void __exit lepton_exit(void)
-{
-    spi_unregister_driver(&lepton_spi_driver);
-    unregister_chrdev(lepton_major, lepton_spi_driver.driver.name);
-}
-module_exit(lepton_exit);
-
-int lepton_open(struct inode *inode, struct file *filp)
-{
-
-    filp->private_data = &lepton_dev;
-    if ((filp->f_flags & O_ACCMODE) == O_WRONLY) {
-		// This device isn't writable
-        return -EINVAL;
-    }
-    return 0;
-}
-
-ssize_t lepton_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
-{
-    struct lepton_dev *leptondev;
-    leptondev = filp->private_data;
-    return 0;
-}
-
-int lepton_release(struct inode *inode, struct file *filp)
-{
-    return 0;
-}
-
 static irqreturn_t lepton_vsync_handler(int irq, void *data)
 {
-	pr_info("VSYNC");
+	static int vsync_count = 0;
+
+	pr_info("VSYNC %d", vsync_count);
 
     return 0;
 }
@@ -140,7 +121,10 @@ static int lepton_probe(struct spi_device *spi)
     dev = &spi->dev;
 	of_node = dev->of_node;
 
-	/* @@ set up character device, configure spi, dma buffers, assign interrupt handler */
+	/* @@ configure spi, dma buffers */
+
+
+	/* set up interrupt handler for lepton VSYNC (frame ready signal) */
 
 	if (!of_node) {
 		dev_err(dev, "missing device tree entry");
@@ -167,6 +151,47 @@ static int lepton_remove(struct spi_device *spi)
 	/* @@ tear down the things in probe */
 	return 0;
 }
+
+/*
+ * toplevel module setup and teardown
+ */
+
+static struct spi_driver lepton_spi_driver = {
+	.driver = {
+		.name	= "lepton",
+		.of_match_table	= lepton_of_match,
+	},
+	.id_table	= lepton_id_table,
+	.probe		= lepton_probe,
+	.remove		= lepton_remove,
+};
+
+static int lepton_init(void) {
+    int status;
+
+	/* character device for sending data to userspace */
+
+    status = register_chrdev(lepton_major, "lepton", &lepton_fops);
+    if (status < 0)
+        return status;
+
+	/* SPI for getting the video data from lepton */
+
+    status = spi_register_driver(&lepton_spi_driver);
+    if (status < 0)
+    {
+        unregister_chrdev(lepton_major, lepton_spi_driver.driver.name);
+    }
+    return status;
+}
+module_init(lepton_init);
+
+static void __exit lepton_exit(void)
+{
+    spi_unregister_driver(&lepton_spi_driver);
+    unregister_chrdev(lepton_major, lepton_spi_driver.driver.name);
+}
+module_exit(lepton_exit);
 
 MODULE_AUTHOR("Ron Lockwood-Childs, VCT Labs, Inc.");
 MODULE_DESCRIPTION("VoSPI driver for FLIR lepton 2.x/3.x");

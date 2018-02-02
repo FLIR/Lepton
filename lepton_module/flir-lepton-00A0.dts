@@ -17,7 +17,6 @@
 		"P9.17",	/* spi0_cs0 */
 		"P9.18",	/* spi0_d1 */
 		"P9.22",	/* spi0_sclk */
-		"P8.17",	/* spi0_sclk */
 		"P8.17",	/* gpmc_ad11.gpio0_27 VSYNC */
 		/* the hardware ip uses */
 		"spi0";
