@@ -12,6 +12,7 @@
 #include <linux/of_device.h>
 #include <linux/of_irq.h>
 #include <linux/spi/spi.h>
+#include <linux/spinlock.h>
 #include <asm/uaccess.h>
 #include <linux/videodev2.h>
 #include <media/v4l2-ctrls.h>
@@ -32,6 +33,9 @@ enum lepton_model {
 
 struct lepton {
 	struct mutex mutex;
+	spinlock_t lock;
+	bool started;
+	struct list_head unfilled_bufs; /* waiting to be filled with data */
 	struct v4l2_device *v4l2_dev;
 	struct video_device *vid_dev;
 	struct vb2_queue *q;
@@ -40,6 +44,11 @@ struct lepton {
 	unsigned int width_in_pixels;
 	unsigned int height;
 	unsigned int sizeimage;
+};
+
+struct lepton_buffer {
+	struct vb2_buffer buf;
+	struct list_head list;
 };
 
 /*
@@ -368,18 +377,35 @@ int lepton_buf_prepare(struct vb2_buffer *vb)
 
 void lepton_buf_queue(struct vb2_buffer *vb)
 {
-	printk(KERN_INFO "%s: stub\n", __func__);
+	struct lepton_buffer *buf = container_of(vb, struct lepton_buffer, buf);
+	struct lepton *lep = vb2_get_drv_priv(vb->vb2_queue);
+	unsigned long flags;
+
+	spin_lock_irqsave(&lep->lock, flags);
+	list_add_tail(&buf->list, &lep->unfilled_bufs);
+	spin_unlock_irqrestore(&lep->lock, flags);
 }
 
 int lepton_start_streaming(struct vb2_queue *vq, unsigned int count)
 {
-	printk(KERN_INFO "%s: stub\n", __func__);
-	return -EINVAL;	//@@@@ NYI
+	struct lepton *lep = vb2_get_drv_priv(vq);
+	lep->started = 1;
+	return 0;
 }
 
 void lepton_stop_streaming(struct vb2_queue *vq)
 {
-	printk(KERN_INFO "%s: stub\n", __func__);
+	struct lepton *lep = vb2_get_drv_priv(vq);
+	struct lepton_buffer *lep_buf = NULL;
+	struct list_head *pos, *q;
+
+	list_for_each_safe(pos, q, &lep->unfilled_bufs) {
+		lep_buf = list_entry(pos, struct lepton_buffer, list);
+		vb2_buffer_done(&lep_buf->buf, VB2_BUF_STATE_ERROR);
+		list_del(&lep_buf->list);
+	}
+
+	lep->started = 0;
 }
 
 static const struct vb2_ops lepton_video_qops = {
@@ -495,6 +521,7 @@ static int lepton_probe(struct spi_device *spi)
 		return -ENOMEM;
 	}
 	mutex_init(&lep->mutex);
+	spin_lock_init(&lep->lock);
 
 	/* initialize v4l2_device -- used for tracking relationships among 
 	 * video-related hardware managed by the V4L2 subsystem 
@@ -550,7 +577,8 @@ static int lepton_probe(struct spi_device *spi)
 	q->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 //	q->io_modes = VB2_MMAP | VB2_DMABUF | VB2_READ; //@@@ is DMABUF freebie with vb2 boilerplate?
 	q->io_modes = VB2_MMAP | VB2_READ;
-	q->buf_struct_size = sizeof(struct vb2_buffer); //@@@ update if custom buffer is needed
+	q->buf_struct_size = sizeof(struct lepton_buffer);
+	q->gfp_flags = GFP_DMA32;
 	q->ops = &lepton_video_qops;
 	q->mem_ops = &vb2_dma_contig_memops;
 	q->timestamp_flags = V4L2_BUF_FLAG_TIMESTAMP_MONOTONIC;
@@ -584,6 +612,7 @@ static int lepton_probe(struct spi_device *spi)
 	lep->width_in_pixels = lepton_get_width_in_pixels();
 	lep->height = lepton_get_height();
 	lep->sizeimage = (lep->width_in_pixels*2) * lep->height;
+	INIT_LIST_HEAD(&lep->unfilled_bufs);
 
 	printk(KERN_INFO LEPTON_MODULE_NAME ": Probe complete\n");
 	return 0;
