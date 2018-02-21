@@ -457,13 +457,43 @@ MODULE_DEVICE_TABLE(of, lepton_of_match);
 
 static irqreturn_t lepton_vsync_handler(int irq, void *data)
 {
+	struct spi_device *spi = (struct spi_device *)data;
+	struct device *dev = NULL;
+	struct lepton *lep = NULL;
+	struct lepton_buffer *lep_buf = NULL;
 	static int vsync_count = 0;
+	unsigned long flags;
 
-	if (printk_ratelimit())
+	dev = &spi->dev;
+	lep = dev_get_drvdata(dev);
+
+	if (printk_ratelimit()) {
 		pr_debug("VSYNC %d", vsync_count);
+		printk(KERN_INFO "spi=%p dev=%p lep=%p\n", spi, dev, lep);
+	}
 	vsync_count++;
 
-	return 0;
+	if (!lep->started) return IRQ_HANDLED;
+
+	/* receive next frame if there is a buffer waiting to be filled;
+	 * otherwise clock out the data to keep the lepton happy 
+	 * (but drop it on the floor) */
+	spin_lock_irqsave(&lep->lock, flags);
+	lep_buf = list_first_entry(&lep->unfilled_bufs, struct lepton_buffer, list);
+	if (lep_buf)
+		list_del(&lep_buf->list);
+	spin_unlock_irqrestore(&lep->lock, flags);
+
+	if (lep_buf) {
+		//@@@@ STUB fill frame with counter value, mark it done
+		memset(vb2_plane_vaddr(&lep_buf->buf, 0), vsync_count, lep->sizeimage);
+		vb2_buffer_done(&lep_buf->buf, VB2_BUF_STATE_DONE);
+	}
+	else {
+		//@@@@ kick off SPI transfer with TX buf only
+	}
+
+	return IRQ_HANDLED;
 }
 
 static int lepton_probe(struct spi_device *spi)
@@ -478,8 +508,12 @@ static int lepton_probe(struct spi_device *spi)
 
 	dev = &spi->dev;
 	of_node = dev->of_node;
+	if (!of_node) {
+		dev_err(dev, "missing device tree entry");
+		return -EINVAL;
+	}
 
-	printk(KERN_INFO LEPTON_MODULE_NAME ": dma mask\n");
+
 	/* set 32-bit DMA mask for allocation of video buffers
 	 */
 	of_dma_configure(dev, of_node); 
@@ -487,28 +521,6 @@ static int lepton_probe(struct spi_device *spi)
 	if (ret) {
 		dev_err(dev, "failed to set DMA mask, err %d", ret);
 		return -EINVAL;
-	}
-
-	printk(KERN_INFO LEPTON_MODULE_NAME ": Map IRQ from device tree\n");
-	/* set up interrupt handler for lepton VSYNC (frame ready signal) 
-	 */
-
-	if (!of_node) {
-		dev_err(dev, "missing device tree entry");
-		return -EINVAL;
-	}
-
-	irq = irq_of_parse_and_map(of_node, 0);
-	if (irq < 0) {
-		dev_err(dev, "failed to map irq");
-		return -EINVAL;
-	}
-
-	printk(KERN_INFO LEPTON_MODULE_NAME ": Register IRQ handler\n");
-	ret = devm_request_irq(dev, irq, lepton_vsync_handler, 0, dev_name(dev), spi);
-	if (ret) {
-		dev_err(dev, "failed to register irq");
-		return ret;
 	}
 
 	/* lepton struct keeps track of both video and spi-related structs,
@@ -543,7 +555,6 @@ static int lepton_probe(struct spi_device *spi)
 	 * (e.g. /dev/videoN) owned by parent v4l2_device 
 	 */
 
-	printk(KERN_INFO LEPTON_MODULE_NAME ": Allocate, initialize, register video device\n");
 	vid_dev = video_device_alloc();
 	if (vid_dev == NULL) {
 		dev_err(dev, "failed to allocate video struct");
@@ -563,7 +574,6 @@ static int lepton_probe(struct spi_device *spi)
 	 * capturing video data 
 	 */
 
-	printk(KERN_INFO LEPTON_MODULE_NAME ": Allocate, initialize, register vb2 queue\n");
 	q = devm_kzalloc(dev, sizeof(*q), GFP_KERNEL);
 	if (q == NULL) {
 		/* now have non-devm (i.e. not automatically released when
@@ -593,7 +603,6 @@ static int lepton_probe(struct spi_device *spi)
 		goto err_queue;
 	}
 
-	printk(KERN_INFO LEPTON_MODULE_NAME ": Final initialization\n");
     /* set up data pointers to be able to find any of the core structs
 	 * when only one is passed into a callback function 
 	 */
@@ -613,6 +622,21 @@ static int lepton_probe(struct spi_device *spi)
 	lep->height = lepton_get_height();
 	lep->sizeimage = (lep->width_in_pixels*2) * lep->height;
 	INIT_LIST_HEAD(&lep->unfilled_bufs);
+
+	/* set up interrupt handler for lepton VSYNC (frame ready signal) 
+	 */
+
+	irq = irq_of_parse_and_map(of_node, 0);
+	if (irq < 0) {
+		dev_err(dev, "failed to map irq");
+		goto err_queue;
+	}
+
+	ret = devm_request_irq(dev, irq, lepton_vsync_handler, 0, dev_name(dev), spi);
+	if (ret) {
+		dev_err(dev, "failed to register irq");
+		goto err_queue;
+	}
 
 	printk(KERN_INFO LEPTON_MODULE_NAME ": Probe complete\n");
 	return 0;
