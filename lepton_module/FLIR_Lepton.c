@@ -361,16 +361,20 @@ int lepton_queue_setup(struct vb2_queue *vq,
 
 int lepton_buf_prepare(struct vb2_buffer *vb)
 {
-	struct lepton *dev = NULL;
+	struct lepton *lep = NULL;
 
 	printk(KERN_INFO "%s: start\n", __func__);
-	dev = vb2_get_drv_priv(vb->vb2_queue);
-	if (vb2_plane_size(vb, 0) < dev->sizeimage)
+	lep = vb2_get_drv_priv(vb->vb2_queue);
+	if (vb2_plane_size(vb, 0) < lep->sizeimage)
 	{
 		pr_debug("%s: data will not fit into buf size %ld\n", __func__, vb2_plane_size(vb, 0));
 		printk(KERN_INFO LEPTON_MODULE_NAME " %s: data will not fit into buf size %ld\n", __func__, vb2_plane_size(vb,0));
 		return -EINVAL;
 	}
+
+	/* amount of data that will be filled in this buffer,
+	 * which will get passed to userspace client in buffer descriptor */
+	vb2_set_plane_payload(vb, 0, lep->sizeimage);
 	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
@@ -389,7 +393,11 @@ void lepton_buf_queue(struct vb2_buffer *vb)
 int lepton_start_streaming(struct vb2_queue *vq, unsigned int count)
 {
 	struct lepton *lep = vb2_get_drv_priv(vq);
+	unsigned long flags;
+
+	spin_lock_irqsave(&lep->lock, flags);
 	lep->started = 1;
+	spin_unlock_irqrestore(&lep->lock, flags);
 	return 0;
 }
 
@@ -398,7 +406,9 @@ void lepton_stop_streaming(struct vb2_queue *vq)
 	struct lepton *lep = vb2_get_drv_priv(vq);
 	struct lepton_buffer *lep_buf = NULL;
 	struct list_head *pos, *q;
+	unsigned long flags;
 
+	spin_lock_irqsave(&lep->lock, flags);
 	list_for_each_safe(pos, q, &lep->unfilled_bufs) {
 		lep_buf = list_entry(pos, struct lepton_buffer, list);
 		vb2_buffer_done(&lep_buf->buf, VB2_BUF_STATE_ERROR);
@@ -406,6 +416,7 @@ void lepton_stop_streaming(struct vb2_queue *vq)
 	}
 
 	lep->started = 0;
+	spin_unlock_irqrestore(&lep->lock, flags);
 }
 
 static const struct vb2_ops lepton_video_qops = {
@@ -463,6 +474,8 @@ static irqreturn_t lepton_vsync_handler(int irq, void *data)
 	struct lepton_buffer *lep_buf = NULL;
 	static int vsync_count = 0;
 	unsigned long flags;
+	unsigned long *vaddr = NULL;
+	unsigned long bufsize = 0;
 
 	dev = &spi->dev;
 	lep = dev_get_drvdata(dev);
@@ -479,14 +492,20 @@ static irqreturn_t lepton_vsync_handler(int irq, void *data)
 	 * otherwise clock out the data to keep the lepton happy 
 	 * (but drop it on the floor) */
 	spin_lock_irqsave(&lep->lock, flags);
-	lep_buf = list_first_entry(&lep->unfilled_bufs, struct lepton_buffer, list);
-	if (lep_buf)
+	if (!list_empty(&lep->unfilled_bufs)) {
+		lep_buf = list_first_entry(&lep->unfilled_bufs, struct lepton_buffer, list);
 		list_del(&lep_buf->list);
+	}
 	spin_unlock_irqrestore(&lep->lock, flags);
 
 	if (lep_buf) {
 		//@@@@ STUB fill frame with counter value, mark it done
-		memset(vb2_plane_vaddr(&lep_buf->buf, 0), vsync_count, lep->sizeimage);
+		vaddr = vb2_plane_vaddr(&lep_buf->buf, 0);
+		bufsize = vb2_plane_size(&lep_buf->buf, 0);
+		printk(KERN_INFO "lep_buf %p buf vaddr: %p index: %u type: %u num_planes: %u, bufsize: %lu, imagesize: %u\n", 
+			lep_buf, vaddr, lep_buf->buf.index, lep_buf->buf.type, lep_buf->buf.num_planes, bufsize, lep->sizeimage);
+		memset(vaddr, vsync_count, lep->sizeimage);
+
 		vb2_buffer_done(&lep_buf->buf, VB2_BUF_STATE_DONE);
 	}
 	else {
