@@ -35,15 +35,18 @@ struct lepton {
 	struct mutex mutex;
 	spinlock_t lock;
 	bool started;
+	bool telemetry_enabled;
 	struct list_head unfilled_bufs; /* waiting to be filled with data */
 	struct v4l2_device *v4l2_dev;
 	struct video_device *vid_dev;
 	struct vb2_queue *q;
 	struct spi_device *spi_dev;
-	int telemetry_enabled;
 	unsigned int width_in_pixels;
 	unsigned int height;
 	unsigned int sizeimage;
+	unsigned int vsync_count;
+	struct spi_transfer *spi_xfer;
+	struct spi_message *spi_msg;
 };
 
 struct lepton_buffer {
@@ -466,25 +469,64 @@ MODULE_DEVICE_TABLE(of, lepton_of_match);
  * toplevel module setup and teardown
  */
 
+static void lepton_spi_done_callback(void *context)
+{
+	struct lepton_buffer *lep_buf = (struct lepton_buffer *)context;
+
+	if (lep_buf) {
+		vb2_buffer_done(&lep_buf->buf, VB2_BUF_STATE_DONE);
+	}
+	pr_debug("SPI done\n");
+}
+
+/* kick off a SPI transfer in interrupt context */
+static void lepton_start_transfer(struct lepton *lep, struct lepton_buffer *lep_buf, void *rx_buf, dma_addr_t rx_dma,
+								bool write_only)
+{
+	/* SPI message consists of one or more transfers,
+	 * in this case only one */
+	spi_message_init(lep->spi_msg);
+	lep->spi_msg->complete = lepton_spi_done_callback;
+	lep->spi_msg->context = (void *)lep_buf;
+	lep->spi_msg->is_dma_mapped = 1;
+
+	/* tx side of SPI transfer was already initialized,
+	 * since all we ever send is zeros */
+	if (!write_only)
+	{
+		memset(rx_buf, 0, lep->spi_xfer->len);
+		lep->spi_xfer->rx_buf = rx_buf;
+		lep->spi_xfer->rx_dma = rx_dma;
+	}
+	else
+	{
+		lep->spi_xfer->rx_buf = NULL;
+		lep->spi_xfer->rx_dma = 0;
+	}
+
+	/* assign this one transfer to message and send it to controller */
+	spi_message_add_tail(lep->spi_xfer, lep->spi_msg);
+	spi_async(lep->spi_dev, lep->spi_msg);
+}
+
 static irqreturn_t lepton_vsync_handler(int irq, void *data)
 {
 	struct spi_device *spi = (struct spi_device *)data;
 	struct device *dev = NULL;
 	struct lepton *lep = NULL;
 	struct lepton_buffer *lep_buf = NULL;
-	static int vsync_count = 0;
 	unsigned long flags;
 	unsigned long *vaddr = NULL;
-	unsigned long bufsize = 0;
+	dma_addr_t dma_addr;
 
 	dev = &spi->dev;
 	lep = dev_get_drvdata(dev);
 
 	if (printk_ratelimit()) {
-		pr_debug("VSYNC %d", vsync_count);
+		pr_debug("VSYNC %d", lep->vsync_count);
 		printk(KERN_INFO "spi=%p dev=%p lep=%p\n", spi, dev, lep);
 	}
-	vsync_count++;
+	lep->vsync_count++;
 
 	if (!lep->started) return IRQ_HANDLED;
 
@@ -499,17 +541,20 @@ static irqreturn_t lepton_vsync_handler(int irq, void *data)
 	spin_unlock_irqrestore(&lep->lock, flags);
 
 	if (lep_buf) {
-		//@@@@ STUB fill frame with counter value, mark it done
+		// testing: fill frame with counter value, mark it done
+#if 0
 		vaddr = vb2_plane_vaddr(&lep_buf->buf, 0);
-		bufsize = vb2_plane_size(&lep_buf->buf, 0);
-		printk(KERN_INFO "lep_buf %p buf vaddr: %p index: %u type: %u num_planes: %u, bufsize: %lu, imagesize: %u\n", 
-			lep_buf, vaddr, lep_buf->buf.index, lep_buf->buf.type, lep_buf->buf.num_planes, bufsize, lep->sizeimage);
-		memset(vaddr, vsync_count, lep->sizeimage);
-
+		memset((unsigned char*)vaddr, (lep->vsync_count & 0xff), lep->sizeimage);
 		vb2_buffer_done(&lep_buf->buf, VB2_BUF_STATE_DONE);
+#endif
+		// kick off spi read
+		vaddr = vb2_plane_vaddr(&lep_buf->buf, 0);
+		dma_addr = vb2_dma_contig_plane_dma_addr(&lep_buf->buf, 0);
+		lepton_start_transfer(lep, lep_buf, vaddr, dma_addr, 0);
 	}
 	else {
-		//@@@@ kick off SPI transfer with TX buf only
+		// kick off SPI transfer with TX buf only
+		lepton_start_transfer(lep, NULL, NULL, 0, 1);
 	}
 
 	return IRQ_HANDLED;
@@ -523,6 +568,8 @@ static int lepton_probe(struct spi_device *spi)
 	struct v4l2_device *v4l2_dev = NULL;
 	struct video_device *vid_dev = NULL;
 	struct vb2_queue *q = NULL;
+	struct spi_transfer *spi_xfer = NULL;
+	struct spi_message *spi_msg = NULL;
 	int ret, irq = -1;
 
 	dev = &spi->dev;
@@ -622,6 +669,19 @@ static int lepton_probe(struct spi_device *spi)
 		goto err_queue;
 	}
 
+	/* initialize spi descriptors and transmit buffer
+	 */
+	spi_msg = devm_kzalloc(dev, sizeof(*spi_msg), GFP_KERNEL);
+	spi_xfer = devm_kzalloc(dev, sizeof(*spi_xfer), GFP_KERNEL);
+	if (spi_xfer == NULL || spi_msg == NULL) {
+	//@@@@@@ err handle
+	}
+	spi_xfer->len = FRAME_WIDTH_LEPTON_2*2*FRAME_HEIGHT_LEPTON_2; // @@@ add telemetry
+	spi_xfer->tx_buf = dma_zalloc_coherent(dev, spi_xfer->len, &spi_xfer->tx_dma, GFP_KERNEL);
+	if (spi_xfer->tx_buf == NULL) {
+	//@@@@@@ err handle
+	}
+
     /* set up data pointers to be able to find any of the core structs
 	 * when only one is passed into a callback function 
 	 */
@@ -630,16 +690,20 @@ static int lepton_probe(struct spi_device *spi)
 	lep->vid_dev = vid_dev;
 	lep->q = q;
 	lep->spi_dev = spi;
+	lep->spi_xfer = spi_xfer;
+	lep->spi_msg = spi_msg;
 
 	dev_set_drvdata(dev, lep);
 	video_set_drvdata(vid_dev, lep);
 	vid_dev->queue = q;
 	q->drv_priv = lep;
 
-	/* initialize private data */
+	/* initialize frame dimensions
+	 */
 	lep->width_in_pixels = lepton_get_width_in_pixels();
 	lep->height = lepton_get_height();
 	lep->sizeimage = (lep->width_in_pixels*2) * lep->height;
+
 	INIT_LIST_HEAD(&lep->unfilled_bufs);
 
 	/* set up interrupt handler for lepton VSYNC (frame ready signal) 
