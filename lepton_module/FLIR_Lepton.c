@@ -25,6 +25,7 @@
 #include <media/videobuf2-memops.h>
 
 #include "FLIR_Lepton.h"
+#include "lepton_vospi_funcs.h"
 
 enum lepton_model {
 	FLIR_LEPTON2	= 2,
@@ -41,11 +42,9 @@ struct lepton {
 	struct video_device *vid_dev;
 	struct vb2_queue *q;
 	struct spi_device *spi_dev;
-	unsigned int width_in_pixels;
-	unsigned int height;
-	unsigned int sizeimage;
 	unsigned int vsync_count;
 	unsigned int discard_count;
+	lepton_vospi_info lep_vospi_info;
 	struct lepton_buffer *current_lep_buf;
 	struct spi_transfer *spi_xfer;
 	struct spi_message *spi_msg;
@@ -131,35 +130,19 @@ static int lepton_enum_fmt_vid_cap(struct file *file, void *priv,
 	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
-static unsigned int lepton_get_width_in_pixels(void)
-{
-	unsigned int frame_width;
-
-	// @@@ determine frame_width from lepton type
-	frame_width = FRAME_WIDTH_LEPTON_2;
-	return frame_width;
-}
-static unsigned int lepton_get_height(void)
-{
-	unsigned int frame_height;
-
-	// @@@ determine frame_width from lepton type
-	frame_height = FRAME_HEIGHT_LEPTON_2;
-	return frame_height;
-}
-static int lepton_set_fmt_fields(struct lepton *dev, struct v4l2_format *f)
+static int lepton_set_fmt_fields(struct lepton *lep, struct v4l2_format *f)
 {
 	struct v4l2_pix_format *pix = NULL;
 
 	printk(KERN_INFO "%s: start\n", __func__);
 	pix = &f->fmt.pix;
 
-	pix->width = dev->width_in_pixels;
-	pix->height = dev->height;
+	pix->width = lep->lep_vospi_info.pixel_width;
+	pix->height = lep->lep_vospi_info.line_count;
 	pix->pixelformat = V4L2_PIX_FMT_Y16;  // 16-bit grayscale
 	pix->colorspace = V4L2_COLORSPACE_RAW;
-	pix->bytesperline = dev->width_in_pixels * 2;
-	pix->sizeimage = dev->sizeimage;
+	pix->bytesperline = lep->lep_vospi_info.pixel_width * 2;
+	pix->sizeimage = lep->lep_vospi_info.total_data_byte_size;
 	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
@@ -193,36 +176,36 @@ static int lepton_g_parm(struct file *file, void *priv,
 static int lepton_g_fmt_vid_cap(struct file *file, void *priv,
 			     struct v4l2_format *f)
 {
-	struct lepton *dev = NULL;
+	struct lepton *lep = NULL;
 
 	printk(KERN_INFO "%s: start\n", __func__);
-	dev = video_drvdata(file);
+	lep = video_drvdata(file);
 
-	lepton_set_fmt_fields(dev, f);
+	lepton_set_fmt_fields(lep, f);
 	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
 static int lepton_try_fmt_vid_cap(struct file *file, void *priv,
 			       struct v4l2_format *f)
 {
-	struct lepton *dev = NULL;
+	struct lepton *lep = NULL;
 
 	printk(KERN_INFO "%s: start\n", __func__);
-	dev = video_drvdata(file);
+	lep = video_drvdata(file);
 	// we only ever have one format, so always send it back.
-	lepton_set_fmt_fields(dev, f);
+	lepton_set_fmt_fields(lep, f);
 	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
 static int lepton_s_fmt_vid_cap(struct file *file, void *priv,
 			     struct v4l2_format *f)
 {
-	struct lepton *dev = NULL;
+	struct lepton *lep = NULL;
 
 	printk(KERN_INFO "%s: start\n", __func__);
-	dev = video_drvdata(file);
+	lep = video_drvdata(file);
 	// we only ever have one format, so always send it back.
-	lepton_set_fmt_fields(dev, f);
+	lepton_set_fmt_fields(lep, f);
 	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
@@ -242,15 +225,15 @@ static int lepton_enum_frameintervals(struct file *file, void *priv,
 static int lepton_enum_framesizes(struct file *file, void *priv,
 			       struct v4l2_frmsizeenum *f)
 {
-	struct lepton *dev = NULL;
+	struct lepton *lep = NULL;
 
 	printk(KERN_INFO "%s: start\n", __func__);
-	dev = video_drvdata(file);
+	lep = video_drvdata(file);
 	if (f->index != 0)
 		return -EINVAL;
 	f->type = V4L2_FRMSIZE_TYPE_DISCRETE;
-	f->discrete.width = dev->width_in_pixels;
-	f->discrete.height = dev->height;
+	f->discrete.width = lep->lep_vospi_info.pixel_width;
+	f->discrete.height = lep->lep_vospi_info.line_count;
 	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
@@ -342,12 +325,12 @@ int lepton_queue_setup(struct vb2_queue *vq,
 			   unsigned int *nbuffers, unsigned int *nplanes,
 			   unsigned int sizes[], struct device *alloc_devs[])
 {
-	struct lepton *dev = NULL;
+	struct lepton *lep = NULL;
 	unsigned int size = -1;
 
 	printk(KERN_INFO "%s: start\n", __func__);
-	dev = vb2_get_drv_priv(vq);
-	size = dev->sizeimage;
+	lep = vb2_get_drv_priv(vq);
+	size = lep->lep_vospi_info.total_data_byte_size;
 	if (*nplanes)
 	{
 		// only allow 1 plane per buffer, and verify size is large enough
@@ -371,7 +354,7 @@ int lepton_buf_prepare(struct vb2_buffer *vb)
 
 	printk(KERN_INFO "%s: start\n", __func__);
 	lep = vb2_get_drv_priv(vb->vb2_queue);
-	if (vb2_plane_size(vb, 0) < lep->sizeimage)
+	if (vb2_plane_size(vb, 0) < lep->lep_vospi_info.total_data_byte_size)
 	{
 		pr_debug("%s: data will not fit into buf size %ld\n", __func__, vb2_plane_size(vb, 0));
 		printk(KERN_INFO LEPTON_MODULE_NAME " %s: data will not fit into buf size %ld\n", __func__, vb2_plane_size(vb,0));
@@ -380,7 +363,7 @@ int lepton_buf_prepare(struct vb2_buffer *vb)
 
 	/* amount of data that will be filled in this buffer,
 	 * which will get passed to userspace client in buffer descriptor */
-	vb2_set_plane_payload(vb, 0, lep->sizeimage);
+	vb2_set_plane_payload(vb, 0, lep->lep_vospi_info.total_data_byte_size);
 	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
@@ -778,8 +761,6 @@ static int lepton_probe(struct spi_device *spi)
 	lep->spi_xfer = spi_xfer;
 	lep->spi_msg = spi_msg;
 	lep->current_lep_buf = NULL;
-	lep->last_spi_done_ts.tv_sec = -1; // no spi transfer has been started yet
-	lep->last_spi_done_ts.tv_nsec = 0;
 
 	dev_set_drvdata(dev, lep);
 	video_set_drvdata(vid_dev, lep);
@@ -788,9 +769,18 @@ static int lepton_probe(struct spi_device *spi)
 
 	/* initialize frame dimensions
 	 */
+#if 0
 	lep->width_in_pixels = lepton_get_width_in_pixels();
 	lep->height = lepton_get_height();
 	lep->sizeimage = (lep->width_in_pixels*2) * lep->height;
+#endif
+
+	lep->last_spi_done_ts.tv_sec = -1; // no spi transfer has been started yet
+	lep->last_spi_done_ts.tv_nsec = 0;
+	// @@@ need lepton version and telemetry module parameters
+	if (!init_lepton_info(&lep->lep_vospi_info, LEPTON_VERSION_2X, 0)) {
+	}
+
 
 	INIT_LIST_HEAD(&lep->unfilled_bufs);
 
