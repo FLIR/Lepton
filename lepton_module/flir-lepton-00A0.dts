@@ -15,7 +15,8 @@
 	exclusive-use =
 		/* the pin header uses */
 		"P9.17",	/* spi0_cs0 */
-		"P9.18",	/* spi0_d1 */
+		/* "P9.18",*/	/* spi0_d1 MOSI */
+		"P9.21",	/* spi0_d0 MISO */
 		"P9.22",	/* spi0_sclk */
 		"P8.17",	/* gpmc_ad11.gpio0_27 VSYNC */
 		/* the hardware ip uses */
@@ -27,9 +28,9 @@
 			/* default state has all gpios released and mode set to uart1 */
 			bb_spi0_pins: pinmux_bb_spi0_pins {
 				pinctrl-single,pins = <
-					AM33XX_IOPAD(0x950, PIN_INPUT_PULLUP | MUX_MODE0)	/* spi0_cs0.spi0_sclk, INPUT_PULLUP | MODE0 */
-					AM33XX_IOPAD(0x958, PIN_INPUT_PULLUP | MUX_MODE0)	/* spi0_cs0.spi0_d1, INPUT_PULLUP | MODE0 */
-					AM33XX_IOPAD(0x95c, PIN_OUTPUT_PULLUP | MUX_MODE0)	/* spi0_cs0.spi0_cs0, OUTPUT_PULLUP | MODE0 */
+					AM33XX_IOPAD(0x950, PIN_INPUT_PULLUP | MUX_MODE0)	/* spi0_sclk, INPUT_PULLUP | MODE0 */
+					AM33XX_IOPAD(0x954, PIN_INPUT_PULLUP | MUX_MODE0)	/* spi0_d0, INPUT_PULLUP | MODE0 */
+					AM33XX_IOPAD(0x95c, PIN_OUTPUT_PULLUP | MUX_MODE0)	/* spi0_cs0, OUTPUT_PULLUP | MODE0 */
 					AM33XX_IOPAD(0x82C, PIN_INPUT_PULLDOWN | MUX_MODE7)	/* gpmc_ad11.gpio0_27 VSYNC */
 				>;
 			};
@@ -58,7 +59,7 @@
 				 * p. 50 Lepton with Radiometry Datasheet (500-0736-01-09 rev 110) 
 				 */
 				reg = <0>;
-				spi-max-frequency = <25000000>;
+				spi-max-frequency = <20000000>;
 				spi-cpha;
 				spi-cpol;
 
