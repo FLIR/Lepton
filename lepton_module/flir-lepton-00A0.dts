@@ -59,7 +59,7 @@
 				 * p. 50 Lepton with Radiometry Datasheet (500-0736-01-09 rev 110) 
 				 */
 				reg = <0>;
-				spi-max-frequency = <20000000>;
+				spi-max-frequency = <24000000>;
 				spi-cpha;
 				spi-cpol;
 

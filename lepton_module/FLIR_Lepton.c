@@ -71,78 +71,64 @@ struct lepton_buffer {
 static int lepton_querycap(struct file *file, void *priv,
 			struct v4l2_capability *cap)
 {
-	printk(KERN_INFO "%s: start\n", __func__);
 	strlcpy(cap->driver, LEPTON_MODULE_NAME, sizeof(cap->driver));
 	strlcpy(cap->card, "FLIR Lepton", sizeof(cap->driver));
 	snprintf(cap->bus_info, sizeof(cap->bus_info), "platform:%s", LEPTON_MODULE_NAME);
 	cap->device_caps = V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_READWRITE | V4L2_CAP_STREAMING;
 	cap->capabilities = cap->device_caps | V4L2_CAP_DEVICE_CAPS;
-	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
 
 static int lepton_enum_input(struct file *file, void *priv,
 			 struct v4l2_input *inp)
 {
-	printk(KERN_INFO "%s: start\n", __func__);
 	if (inp->index > 0)
 		return -EINVAL;
 
 	inp->type = V4L2_INPUT_TYPE_CAMERA;
 	snprintf(inp->name, sizeof(inp->name), LEPTON_MODULE_NAME);
 	inp->capabilities = 0;
-	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
 
 static int lepton_s_input(struct file *file, void *priv, unsigned int i)
 {
-	printk(KERN_INFO "%s: start\n", __func__);
 	// only 1 input
 	if (i != 0)
 		return -EINVAL;
-	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
 static int lepton_g_input(struct file *file, void *priv, unsigned int *i)
 {
-	printk(KERN_INFO "%s: start\n", __func__);
 	// only 1 input
 	*i = 0;
-	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
 static int lepton_querystd(struct file *file, void *fh, v4l2_std_id *std)
 {
-	printk(KERN_INFO "%s: stub\n", __func__);
 	// nothing to say about the video standard
 	return -ENODATA;
 }
 static int lepton_s_std(struct file *file, void *fh, v4l2_std_id std)
 {
-	printk(KERN_INFO "%s: stub\n", __func__);
 	return -ENODATA;
 }
 static int lepton_g_std(struct file *file, void *fh, v4l2_std_id *std)
 {
-	printk(KERN_INFO "%s: stub\n", __func__);
 	return -ENODATA;
 }
 static int lepton_enum_fmt_vid_cap(struct file *file, void *priv,
 				struct v4l2_fmtdesc *f)
 {
-	printk(KERN_INFO "%s: start\n", __func__);
 	if (f->index != 0)
 		return -EINVAL;
 	f->pixelformat = V4L2_PIX_FMT_Y16;
-	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
 static int lepton_set_fmt_fields(struct lepton *lep, struct v4l2_format *f)
 {
 	struct v4l2_pix_format *pix = NULL;
 
-	printk(KERN_INFO "%s: start\n", __func__);
 	pix = &f->fmt.pix;
 
 	pix->width = lep->lep_vospi_info.pixel_width;
@@ -151,34 +137,29 @@ static int lepton_set_fmt_fields(struct lepton *lep, struct v4l2_format *f)
 	pix->colorspace = V4L2_COLORSPACE_RAW;
 	pix->bytesperline = lep->lep_vospi_info.pixel_width * 2;
 	pix->sizeimage = lep->lep_vospi_info.total_data_byte_size;
-	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
 static int lepton_s_parm(struct file *file, void *priv,
 			     struct v4l2_streamparm *parm)
 {
-	printk(KERN_INFO "%s: start\n", __func__);
 	if (parm->type != V4L2_BUF_TYPE_VIDEO_CAPTURE)
 		return -EINVAL;
 
 	parm->parm.capture.timeperframe.numerator = 1;
 	parm->parm.capture.timeperframe.denominator = 30;
 	parm->parm.capture.readbuffers  = 1;
-	printk(KERN_INFO "%s: done\n", __func__);
 
 	return 0;
 }
 static int lepton_g_parm(struct file *file, void *priv,
 			     struct v4l2_streamparm *parm)
 {
-	printk(KERN_INFO "%s: start\n", __func__);
 	if (parm->type != V4L2_BUF_TYPE_VIDEO_CAPTURE)
 		return -EINVAL;
 
 	parm->parm.capture.timeperframe.numerator = 1;
 	parm->parm.capture.timeperframe.denominator = 30;
 	parm->parm.capture.readbuffers  = 1;
-	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
 static int lepton_g_fmt_vid_cap(struct file *file, void *priv,
@@ -186,11 +167,9 @@ static int lepton_g_fmt_vid_cap(struct file *file, void *priv,
 {
 	struct lepton *lep = NULL;
 
-	printk(KERN_INFO "%s: start\n", __func__);
 	lep = video_drvdata(file);
 
 	lepton_set_fmt_fields(lep, f);
-	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
 static int lepton_try_fmt_vid_cap(struct file *file, void *priv,
@@ -198,11 +177,9 @@ static int lepton_try_fmt_vid_cap(struct file *file, void *priv,
 {
 	struct lepton *lep = NULL;
 
-	printk(KERN_INFO "%s: start\n", __func__);
 	lep = video_drvdata(file);
 	// we only ever have one format, so always send it back.
 	lepton_set_fmt_fields(lep, f);
-	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
 static int lepton_s_fmt_vid_cap(struct file *file, void *priv,
@@ -210,24 +187,20 @@ static int lepton_s_fmt_vid_cap(struct file *file, void *priv,
 {
 	struct lepton *lep = NULL;
 
-	printk(KERN_INFO "%s: start\n", __func__);
 	lep = video_drvdata(file);
 	// we only ever have one format, so always send it back.
 	lepton_set_fmt_fields(lep, f);
-	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
 static int lepton_enum_frameintervals(struct file *file, void *priv,
 				   struct v4l2_frmivalenum *f)
 {
-	printk(KERN_INFO "%s: start\n", __func__);
 	if (f->index != 0)
 		return -EINVAL;
 	f->type = V4L2_FRMIVAL_TYPE_DISCRETE;
 	// always runs at 30Hz
 	f->discrete.numerator = 1;
 	f->discrete.denominator = 30;
-	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
 static int lepton_enum_framesizes(struct file *file, void *priv,
@@ -235,43 +208,19 @@ static int lepton_enum_framesizes(struct file *file, void *priv,
 {
 	struct lepton *lep = NULL;
 
-	printk(KERN_INFO "%s: start\n", __func__);
 	lep = video_drvdata(file);
 	if (f->index != 0)
 		return -EINVAL;
 	f->type = V4L2_FRMSIZE_TYPE_DISCRETE;
 	f->discrete.width = lep->lep_vospi_info.pixel_width;
 	f->discrete.height = lep->lep_vospi_info.line_count;
-	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
-
-#if 0
-static int lepton_release(struct file *file)
-{
-	struct video_device *vdev = NULL;
-	struct mutex *lock = NULL;
-	int ret = -1;
-
-	printk(KERN_INFO "%s: start\n", __func__);
-	vdev = video_devdata(file);
-	printk(KERN_INFO "%s: vdev points to %p\n", __func__, vdev);
-	printk(KERN_INFO "%s: vdev->queue points to %p\n", __func__, vdev->queue);
-	printk(KERN_INFO "%s: vdev->queue->lock points to %p\n", __func__, vdev->queue->lock);
-	printk(KERN_INFO "%s: vdev->lock points to %p\n", __func__, vdev->lock);
-	lock = vdev->queue->lock ? vdev->queue->lock : vdev->lock;
-	printk(KERN_INFO "%s: mutex points to %p\n", __func__, lock);
-	// ret = _vb2_fop_release(file, lock);
-	printk(KERN_INFO "%s: done\n", __func__);
-	return 0;
-}
-#endif
 
 static struct v4l2_file_operations lepton_fops = {
 	.owner =    THIS_MODULE,
 	.open =     v4l2_fh_open,
 	.release =  vb2_fop_release,
-//	.release =  lepton_release,
 	.read =     vb2_fop_read,    
 	.poll =     vb2_fop_poll,
 	.mmap =     vb2_fop_mmap,
@@ -281,10 +230,6 @@ static struct v4l2_file_operations lepton_fops = {
 static const struct v4l2_ioctl_ops lepton_ioctl_ops = {
 	.vidioc_s_parm			= lepton_s_parm,
 	.vidioc_g_parm			= lepton_g_parm,
-#if 0 // How much of this is mandatory?
-	.vidioc_g_selection	= lepton_g_selection,
-	.vidioc_s_selection	= lepton_s_selection,
-#endif
 	.vidioc_querycap	= lepton_querycap,
 	.vidioc_enum_input	= lepton_enum_input,
 	.vidioc_g_input		= lepton_g_input,
@@ -336,7 +281,6 @@ int lepton_queue_setup(struct vb2_queue *vq,
 	struct lepton *lep = NULL;
 	unsigned int size = -1;
 
-	printk(KERN_INFO "%s: start\n", __func__);
 	lep = vb2_get_drv_priv(vq);
 	size = lep->lep_vospi_info.total_data_byte_size;
 	if (*nplanes)
@@ -351,8 +295,6 @@ int lepton_queue_setup(struct vb2_queue *vq,
 	*nplanes = 1;
 	sizes[0] = size;
 	pr_debug("get %d buffers, each holding %d bytes.\n", *nbuffers, sizes[0]);
-	printk(KERN_INFO LEPTON_MODULE_NAME " %s: get %d buffers, each holding %d bytes.\n", __func__, *nbuffers, sizes[0]);
-	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
 
@@ -360,19 +302,16 @@ int lepton_buf_prepare(struct vb2_buffer *vb)
 {
 	struct lepton *lep = NULL;
 
-	printk(KERN_INFO "%s: start\n", __func__);
 	lep = vb2_get_drv_priv(vb->vb2_queue);
 	if (vb2_plane_size(vb, 0) < lep->lep_vospi_info.total_data_byte_size)
 	{
 		pr_debug("%s: data will not fit into buf size %ld\n", __func__, vb2_plane_size(vb, 0));
-		printk(KERN_INFO LEPTON_MODULE_NAME " %s: data will not fit into buf size %ld\n", __func__, vb2_plane_size(vb,0));
 		return -EINVAL;
 	}
 
 	/* amount of data that will be filled in this buffer,
 	 * which will get passed to userspace client in buffer descriptor */
 	vb2_set_plane_payload(vb, 0, lep->lep_vospi_info.total_data_byte_size);
-	printk(KERN_INFO "%s: done\n", __func__);
 	return 0;
 }
 
@@ -483,11 +422,7 @@ static void lepton_spi_done_callback(void *context)
 	frame_done = lep->synced;
 
 	subframe_data = lep->spi_xfer->rx_buf;
-#ifdef SOMEDAY_WHEN_FRAME_VALIDATION_WORKS
 	if (is_subframe_line_counter_valid(&lep->lep_vospi_info, subframe_data)) {
-#else
-	if (1) {
-#endif
 		lep->synced = true;
 		lep->discard_count = 0;
 	}
@@ -505,7 +440,6 @@ static void lepton_spi_done_callback(void *context)
 	spin_unlock_irqrestore(&lep->lock, flags);
 
 	if (lep_buf) {
-		printk(KERN_DEBUG "finished buf @ %p\n", subframe_data);
 		vb2_buffer_done(&lep_buf->buf, VB2_BUF_STATE_DONE); 
 	}
 	// pr_debug("SPI done (%d discards)\n", discard_err);
@@ -533,25 +467,24 @@ static void lepton_start_transfer(struct lepton *lep, void *rx_buf, dma_addr_t r
 	spi_message_add_tail(lep->spi_xfer, lep->spi_msg);
 	spin_unlock_irqrestore(&lep->lock, flags);
 	spi_async(lep->spi_dev, lep->spi_msg);
-
-if (rx_len != lep->spare_buf.len) printk(KERN_DEBUG "kicking off buf @ %p\n", rx_buf);
 }
 
-static void lepton_timing_debug(struct lepton *lep, struct device *dev)
+static int lepton_timing_ok(struct lepton *lep, struct timespec *now)
 {
-	struct timespec now;
 	struct timespec delta;
+	int timing_ok = 1;
 
-	ktime_get_ts(&now);
 	if (lep->last_spi_done_ts.tv_sec == 0) {
-		dev_warn(dev, "WARNING: You've been lapped!\n");
+		pr_debug("VSYNC %d miss!\n", lep->vsync_count);
+		timing_ok = 0;
 	}
 	else {
-		delta = timespec_sub(now, lep->last_spi_done_ts);
+		delta = timespec_sub(*now, lep->last_spi_done_ts);
 		if (delta.tv_nsec < MINIMUM_SPI_TRANSFER_QUIET_TIME) {
-			dev_warn(dev, "WARNING: Previous SPI transfer ended during quiet period!\n");
+			pr_debug("VSYNC warning!\n");
 		}
 	}
+	return timing_ok;
 }
 
 static irqreturn_t lepton_vsync_handler(int irq, void *data)
@@ -565,7 +498,9 @@ static irqreturn_t lepton_vsync_handler(int irq, void *data)
 	dma_addr_t dma_addr;
 	int synced = 0;
 	unsigned rx_len;
+	struct timespec now;
 
+	ktime_get_ts(&now); /* time at beginning of IRQ handler */
 	dev = &spi->dev;
 	lep = dev_get_drvdata(dev);
 
@@ -577,13 +512,16 @@ static irqreturn_t lepton_vsync_handler(int irq, void *data)
 #endif
 
 	spin_lock_irqsave(&lep->lock, flags);
-	if (lep->last_spi_done_ts.tv_sec == 0) {
-		pr_debug("VSYNC %d miss!\n", lep->vsync_count);
+	lep->vsync_count++;
+
+	/* Do not kick off another DMA if the previous has not
+	 * finished (which is a SERIOUS problem, since missing subframes
+	 * can knock lepton into a bad state that requires hardware reset 
+	 */
+	if (!lepton_timing_ok(lep, &now)) {
 		spin_unlock_irqrestore(&lep->lock, flags);
 		return IRQ_HANDLED;
 	}
-	// lepton_timing_debug(lep, dev);
-	lep->vsync_count++;
 
 	/* If streaming was stopped and a buffer is still unfinished, 
 	 * return it to user space and don't take any more buffers

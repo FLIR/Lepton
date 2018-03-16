@@ -19,7 +19,7 @@
  */
 #define ONE_MS_IN_NS 1000000
 // the last SPI transfer needs to complete this many ns before VSYNC
-#define MINIMUM_SPI_TRANSFER_QUIET_TIME (2 * ONE_MS_IN_NS)
+#define MINIMUM_SPI_TRANSFER_QUIET_TIME (1 * ONE_MS_IN_NS)
 // how many discards in a row can be received before giving up
 #define MAX_CONSEC_DISCARD_COUNT 120
 
