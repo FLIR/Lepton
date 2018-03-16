@@ -57,7 +57,7 @@ int init_lepton_info(lepton_vospi_info *lep_info, lepton_version lep_version, in
  * Given a pointer to 16-bit sub-frame data, return a pointer to the first 16-
  * bit value on the given line.
  */
-unsigned short *get_line_from_subframe(unsigned short *subframe_data, int line_no);
+unsigned char *get_line_from_subframe(unsigned short *subframe_data, int line_no);
 
 /*
  * Given a pointer to 16-bit sub-frame data, determine whether the last line's

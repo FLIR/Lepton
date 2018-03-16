@@ -71,14 +71,14 @@ int init_lepton_info(lepton_vospi_info *lep_info, lepton_version lep_version, in
 	return ok;
 }
 
-unsigned short *get_line_from_subframe(unsigned short *subframe_data, int line_no) {
-	return &(subframe_data[LEPTON_SUBFRAME_LINE_WORD_COUNT*line_no]);
+unsigned char *get_line_from_subframe(unsigned short *subframe_data, int line_no) {
+	return (unsigned char *)&(subframe_data[LEPTON_SUBFRAME_LINE_WORD_COUNT*line_no]);
 }
 
 int is_subframe_line_counter_valid(lepton_vospi_info *lep_info, unsigned short *subframe_data) {
 	int valid = 0;
 	int last_line_no = LEPTON_SUBFRAME_DATA_LINE_HEIGHT-1;
-	unsigned short *last_line = NULL;
+	unsigned char *last_line = NULL;
 
 	if (lep_info->telemetry_enabled) {
 		if (lep_info->lep_version == LEPTON_VERSION_2X) {
@@ -89,7 +89,7 @@ int is_subframe_line_counter_valid(lepton_vospi_info *lep_info, unsigned short *
 		}
 	}
 	last_line = get_line_from_subframe(subframe_data, last_line_no);
-	if (last_line[0] == (LEPTON_SUBFRAME_DATA_LINE_HEIGHT-1)) {
+	if (last_line[1] == (LEPTON_SUBFRAME_DATA_LINE_HEIGHT-1)) {
 		valid = 1;
 	}
 	return valid;
@@ -103,9 +103,9 @@ int get_subframe_index_from_subframe(unsigned short *subframe_data) {
 	unsigned char *subframe_byte_base = NULL;
 	int subframe_index = 0;
 
-	subframe_byte_base = (unsigned char *)get_line_from_subframe(subframe_data, LEPTON3_SUBFRAME_INDEX_LINE1);
+	subframe_byte_base = get_line_from_subframe(subframe_data, LEPTON3_SUBFRAME_INDEX_LINE1);
 	subframe_index = (subframe_byte_base[LEPTON3_SUBFRAME_INDEX_BYTE] & LEPTON3_SUBFRAME_INDEX_LINE1_BYTE1_MASK) >> 4;
-	subframe_byte_base = (unsigned char *)get_line_from_subframe(subframe_data, LEPTON3_SUBFRAME_INDEX_LINE2);
+	subframe_byte_base = get_line_from_subframe(subframe_data, LEPTON3_SUBFRAME_INDEX_LINE2);
 	subframe_index |= (subframe_byte_base[LEPTON3_SUBFRAME_INDEX_BYTE] & LEPTON3_SUBFRAME_INDEX_LINE2_BYTE1_MASK) >> 1;
 
 	return subframe_index;
