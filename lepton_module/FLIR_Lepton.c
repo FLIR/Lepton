@@ -410,19 +410,28 @@ static void lepton_spi_done_callback(void *context)
 	unsigned short *subframe_data = NULL;
 	struct lepton_buffer *lep_buf = NULL;
 	struct timespec now;
-	unsigned int discard_err = 0;
-	bool frame_done = false;
+	bool subframe_is_good = false;
 
 	ktime_get_ts(&now);
+
 	spin_lock_irqsave(&lep->lock, flags);
 	lep->last_spi_done_ts.tv_sec = now.tv_sec;
 	lep->last_spi_done_ts.tv_nsec = now.tv_nsec;
 
-	//@@@@ STUB, really need to wait for full lep3 frame
-	frame_done = lep->synced;
+	/* current_lep_buf will already be NULL if spare buffer is in use;
+	 * non-NULL if instead data was transferred to a V4L-allocated buffer
+	 * for consumption by userspace
+	 */
+	lep_buf = lep->current_lep_buf;
+	lep->current_lep_buf = NULL;
 
+	/* analyze data to decide if data is synced up into proper subframes yet,
+	 * so that data can be sent to userspace when V4L buffers are available
+	 */
 	subframe_data = lep->spi_xfer->rx_buf;
-	if (is_subframe_line_counter_valid(&lep->lep_vospi_info, subframe_data)) {
+    subframe_is_good = is_subframe_line_counter_valid(&lep->lep_vospi_info, subframe_data);
+
+	if (subframe_is_good) {
 		lep->synced = true;
 		lep->discard_count = 0;
 	}
@@ -430,19 +439,23 @@ static void lepton_spi_done_callback(void *context)
 		lep->synced = false;
 		lep->discard_count++;
 	}
-	discard_err = lep->discard_count;
-
-	if (frame_done) {
-		lep_buf = lep->current_lep_buf;
-		lep->current_lep_buf = NULL;
-	}
 
 	spin_unlock_irqrestore(&lep->lock, flags);
 
+	/* V4L buffers need to be dispatched back to userspace,
+	 * marking it as good if validation check passed and otherwise
+	 * noting an error (userspace will thus be informed when 
+	 * synced video unexpectedly goes out of sync)
+	 */
 	if (lep_buf) {
-		vb2_buffer_done(&lep_buf->buf, VB2_BUF_STATE_DONE); 
+		if (subframe_is_good) {
+			vb2_buffer_done(&lep_buf->buf, VB2_BUF_STATE_DONE); 
+		}
+		else {
+			pr_debug("Lost frame sync!\n");
+			vb2_buffer_done(&lep_buf->buf, VB2_BUF_STATE_ERROR); 
+		}
 	}
-	// pr_debug("SPI done (%d discards)\n", discard_err);
 }
 
 /* kick off a SPI transfer in interrupt context */
@@ -523,37 +536,40 @@ static irqreturn_t lepton_vsync_handler(int irq, void *data)
 		return IRQ_HANDLED;
 	}
 
-	/* If streaming was stopped and a buffer is still unfinished, 
-	 * return it to user space and don't take any more buffers
-	 *
-	 * Otherwise decide whether to continue filling a partial frame
-	 * (possible on Lepton 3.x) or to take a new buffer
+	/* If video is synced and there are V4L buffers available,
+	 * take the first one to fill with data
 	 */
-	if (!lep->started) {
-		if (lep->current_lep_buf) {
-			vb2_buffer_done(&lep->current_lep_buf->buf, VB2_BUF_STATE_ERROR);
-			lep->current_lep_buf = NULL;
-			lep->discard_count = 0;
-		}
-	}
-	else {
-		if (lep->current_lep_buf) {
-			/* A buffer is still active and hasn't received a full frame yet */
-			lep_buf = lep->current_lep_buf;
-		}
-		else if (!list_empty(&lep->unfilled_bufs)) {
-			lep_buf = list_first_entry(&lep->unfilled_bufs, struct lepton_buffer, list);
-			list_del(&lep_buf->list);
-			lep->current_lep_buf = lep_buf;
-		}
+	if (lep->synced && !list_empty(&lep->unfilled_bufs)) {
+		lep_buf = list_first_entry(&lep->unfilled_bufs, struct lepton_buffer, list);
+		list_del(&lep_buf->list);
+		lep->current_lep_buf = lep_buf;
 	}
 	synced = lep->synced;  /* cache this for use outside spinlock */
 	lep->last_spi_done_ts.tv_sec = 0; /* reset timer for upcoming spi transfer */
 	spin_unlock_irqrestore(&lep->lock, flags);
 
-	/* receive next frame if there is a buffer waiting to be filled;
-	 * otherwise clock out the data to keep the lepton happy 
-	 * (but drop it on the floor) 
+	/* driver provides a spare buffer for two purposes:
+	 * - achieving sync of video frames
+	 * - place to stash SPI data when no V4L buffers are available
+	 *
+	 * Achieving sync:
+	 *   When video streaming starts up, there can be some extra lines
+	 * of data before the real start of frame (marked by line counter=0).
+	 * In that case driver will "catch up" by using the spare buffer,
+	 * which has one extra line worth of space. Reading out full frame
+	 * plus a line will gradually drain out the extra data until a frame 
+	 * starts with line 0 at the beginning. On that first synced frame,
+	 * the extra transferred line will be a "discard packet" which can 
+	 * just be ignored.
+	 *
+	 * Fallback when no V4L buffers are available:
+	 *   After the extra lines have been cleared out, frame-sized
+	 * buffers allocated by V4L layer can be used to receive data
+	 * that will then be passed to userspace. However, it is up
+	 * to userspace to allocate V4L buffers and to keep returning
+	 * them to the driver. The lepton is most stable if data
+	 * is *always* clocked out in a timely manner, so the spare buffer
+	 * is used to clock out data when no V4L buffer is available.
 	 */
 	if (lep_buf && synced) {
 		/* kick off spi read to V4L buffer */
@@ -561,6 +577,7 @@ static irqreturn_t lepton_vsync_handler(int irq, void *data)
 		dma_addr = vb2_dma_contig_plane_dma_addr(&lep_buf->buf, 0);
 		// printk(KERN_INFO "SPI read into %p (%u)\n", vaddr, dma_addr);
 		rx_len = lep->lep_vospi_info.subframe_data_byte_size;
+		memset(vaddr, 0xa5, rx_len); //@@@@@
 		lepton_start_transfer(lep, vaddr, dma_addr, rx_len);
 	}
 	else {
