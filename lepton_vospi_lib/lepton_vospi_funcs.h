@@ -28,13 +28,15 @@
 
 typedef enum {LEPTON_VERSION_2X=2, LEPTON_VERSION_3X, LEPTON_VERSION_INVALID} lepton_version;
 
+typedef enum {TELEMETRY_OFF, TELEMETRY_AT_START, TELEMETRY_AT_END, TELEMETRY_INVALID_LOCATION} telemetry_location;
+
 typedef struct _lepton_vospi_info_t {
 	lepton_version lep_version;		// 2 or 3, passed into
 						//  init_lepton_info()
 	int pixel_width;			// frame width in pixels
 	int pixel_height;			// frame height in pixels
 	int line_count;		// number of lines (including telemetry) in an entire frame
-	int telemetry_enabled:1;		// 0 or 1, passed into
+	telemetry_location telemetry_loc;		// off, start, or end; passed into
 						//  init_lepton_info()
 	unsigned int next_subframe_index;	// filled in by
 						//  init_lepton_info(), used
@@ -51,7 +53,7 @@ typedef struct _lepton_vospi_info_t {
  * Given a pointer to a pre-allocated lepton_vospi_info struct, the lepton
  * version number, and a telemetry enabled flag, fill in the struct members.
  */
-int init_lepton_info(lepton_vospi_info *lep_info, lepton_version lep_version, int telemetry_enabled);
+int init_lepton_info(lepton_vospi_info *lep_info, lepton_version lep_version, telemetry_location telemetry_loc);
 
 /*
  * Given a pointer to 16-bit sub-frame data, return a pointer to the first 16-

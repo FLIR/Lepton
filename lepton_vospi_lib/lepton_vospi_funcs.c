@@ -15,9 +15,9 @@
 
 /*
  * Given a pointer to a pre-allocated lepton_vospi_info struct, the lepton
- * version number, and a telemetry enabled flag, fill in the struct members.
+ * version number, and a telemetry location, fill in the struct members.
  */
-int init_lepton_info(lepton_vospi_info *lep_info, lepton_version lep_version, int telemetry_enabled) {
+int init_lepton_info(lepton_vospi_info *lep_info, lepton_version lep_version, telemetry_location telemetry_loc) {
 	int ok = 0;  // 0 means no errors
 
     // check for typecasting from bad version values
@@ -45,27 +45,29 @@ int init_lepton_info(lepton_vospi_info *lep_info, lepton_version lep_version, in
 	lep_info->line_count = lep_info->pixel_height;
 	lep_info->subframe_data_byte_size = LEPTON_SUBFRAME_SIZE; // SPI xfer bytes per subframe, without telemetry
 	lep_info->total_data_byte_size = lep_info->frame_size; // size of 1 frame's worth of data in bytes
-	lep_info->telemetry_enabled = 0;
+	lep_info->telemetry_loc = TELEMETRY_OFF;
 	/*
 	 * The total_data_byte_size and subframe_data_byte_size members depend on
 	 * the lepton version and whether telemetry is enabled.
 	 */
-	if (telemetry_enabled) {
-		lep_info->telemetry_enabled = 1;
-		if (lep_version == LEPTON_VERSION_2X) {
-			// each subframe contains 3 additional lines of telemetry (SPI xfer size)
-			lep_info->subframe_data_byte_size += LEPTON2_TELEMETRY_SUBFRAME_SIZE;
-			lep_info->line_count += LEPTON2_TELEMETRY_LINE_HEIGHT;
-			// each frame consists of 1 subframe + 3 lines of telemetry (overall buffer size)
-			lep_info->total_data_byte_size += LEPTON2_TELEMETRY_SUBFRAME_SIZE;
-		}
-		else {
-			// each subframe contains 1 additional line of telemetry (SPI xfer size)
-			lep_info->subframe_data_byte_size += LEPTON3_TELEMETRY_SUBFRAME_SIZE;
-			// each frame contains 4 additional lines (only 3 are telemetry)
-			lep_info->line_count += LEPTON3_TELEMETRY_FRAME_LINE_HEIGHT;
-			// each frame consists of 4 subframes + 4 lines of telemetry (overall buffer size)
-			lep_info->total_data_byte_size += (LEPTON3_TELEMETRY_FRAME_LINE_HEIGHT * LEPTON_SUBFRAME_LINE_BYTE_WIDTH);
+	if ((telemetry_loc >= TELEMETRY_OFF) && (telemetry_loc < TELEMETRY_INVALID_LOCATION)) {
+		lep_info->telemetry_loc = telemetry_loc;
+		if (telemetry_loc != TELEMETRY_OFF) {
+			if (lep_version == LEPTON_VERSION_2X) {
+				// each subframe contains 3 additional lines of telemetry (SPI xfer size)
+				lep_info->subframe_data_byte_size += LEPTON2_TELEMETRY_SUBFRAME_SIZE;
+				lep_info->line_count += LEPTON2_TELEMETRY_LINE_HEIGHT;
+				// each frame consists of 1 subframe + 3 lines of telemetry (overall buffer size)
+				lep_info->total_data_byte_size += LEPTON2_TELEMETRY_SUBFRAME_SIZE;
+			}
+			else {
+				// each subframe contains 1 additional line of telemetry (SPI xfer size)
+				lep_info->subframe_data_byte_size += LEPTON3_TELEMETRY_SUBFRAME_SIZE;
+				// each frame contains 4 additional lines (only 3 are telemetry)
+				lep_info->line_count += LEPTON3_TELEMETRY_FRAME_LINE_HEIGHT;
+				// each frame consists of 4 subframes + 4 lines of telemetry (overall buffer size)
+				lep_info->total_data_byte_size += (LEPTON3_TELEMETRY_FRAME_LINE_HEIGHT * LEPTON_SUBFRAME_LINE_BYTE_WIDTH);
+			}
 		}
 	}
 	return ok;
@@ -80,7 +82,7 @@ int is_subframe_line_counter_valid(lepton_vospi_info *lep_info, unsigned short *
 	int last_line_no = LEPTON_SUBFRAME_DATA_LINE_HEIGHT-1;
 	unsigned char *last_line = NULL;
 
-	if (lep_info->telemetry_enabled) {
+	if (lep_info->telemetry_loc > TELEMETRY_OFF) {
 		if (lep_info->lep_version == LEPTON_VERSION_2X) {
 			last_line_no += LEPTON2_TELEMETRY_SUBFRAME_LINE_HEIGHT;
 		}
