@@ -16,7 +16,6 @@
 #define LEPTON2_TELEMETRY_FRAME_LINE_HEIGHT LEPTON2_TELEMETRY_SUBFRAME_LINE_HEIGHT
 #define LEPTON2_TELEMETRY_SUBFRAME_SIZE (LEPTON2_TELEMETRY_SUBFRAME_LINE_HEIGHT * LEPTON_SUBFRAME_LINE_BYTE_WIDTH)
 #define LEPTON3_TELEMETRY_SUBFRAME_LINE_HEIGHT 1  // each subframe has 1 extra line
-#define LEPTON3_TELEMETRY_FRAME_LINE_HEIGHT 4  // each full frame has 4 extra lines
 #define LEPTON3_TELEMETRY_SUBFRAME_SIZE (LEPTON3_TELEMETRY_SUBFRAME_LINE_HEIGHT * LEPTON_SUBFRAME_LINE_BYTE_WIDTH)
 
 // constants for collecting the subframe index from Lepton 3.x subframes
@@ -30,23 +29,29 @@ typedef enum {LEPTON_VERSION_2X=2, LEPTON_VERSION_3X, LEPTON_VERSION_INVALID} le
 
 typedef enum {TELEMETRY_OFF, TELEMETRY_AT_START, TELEMETRY_AT_END, TELEMETRY_INVALID_LOCATION} telemetry_location;
 
+/* Parameters to be calculated for driver code */
+struct subframe_parameters {
+	int line_count;		// number of lines (including telemetry) in a subframe
+	unsigned int subframe_data_byte_size;	// init_lepton_info() fills this in;
+						//  use for SPI DMA transfer length
+};
+
+/* Parameters to be calculated for user-space code */
+struct image_parameters {
+	int pixel_width;			// frame width in pixels
+	int pixel_height;			// frame height in pixels
+};
+
 typedef struct _lepton_vospi_info_t {
 	lepton_version lep_version;		// 2 or 3, passed into
 						//  init_lepton_info()
-	int pixel_width;			// frame width in pixels
-	int pixel_height;			// frame height in pixels
-	int line_count;		// number of lines (including telemetry) in an entire frame
 	telemetry_location telemetry_loc;		// off, start, or end; passed into
 						//  init_lepton_info()
 	unsigned int next_subframe_index;	// filled in by
 						//  init_lepton_info(), used
 						//  internally.
-	unsigned int subframe_data_byte_size;	// init_lepton_info() fills this in; use
-						//  for SPI DMA transfer length
-	unsigned int frame_size;		// init_lepton_info() fills this in; use
-						// for allocating actual image data
-	unsigned int total_data_byte_size;	// init_lepton_info() fills this in; use
-						// this size for allocating buffers
+	struct subframe_parameters subframe_params;
+	struct image_parameters image_params;
 } lepton_vospi_info;
 
 /*
@@ -79,6 +84,10 @@ int is_subframe_index_valid(lepton_vospi_info *lep_info, unsigned short *subfram
 
 /*
  * Extract pixel data from one entire frame collected over SPI.
+ *
+ * lep_info: The struct holding lepton VOSPI parameters.
+ * received_frame: The raw unprocessed data received from the kernel driver.
+ * pixel_data: A pre-allocated buffer (size lep_info->total
  */
-// int extract_pixel_data(lepton_vospi_info *lep_info, unsigned short *received frame, unsigned short *pixel_data);
+// int extract_pixel_data(lepton_vospi_info *lep_info, unsigned short *received_frame, unsigned short *pixel_data);
 

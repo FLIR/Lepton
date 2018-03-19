@@ -131,12 +131,12 @@ static int lepton_set_fmt_fields(struct lepton *lep, struct v4l2_format *f)
 
 	pix = &f->fmt.pix;
 
-	pix->width = lep->lep_vospi_info.pixel_width;
-	pix->height = lep->lep_vospi_info.line_count;
+	pix->width = LEPTON_SUBFRAME_LINE_WORD_COUNT;
+	pix->height = lep->lep_vospi_info.subframe_params.line_count;
 	pix->pixelformat = V4L2_PIX_FMT_Y16;  // 16-bit grayscale
 	pix->colorspace = V4L2_COLORSPACE_RAW;
-	pix->bytesperline = lep->lep_vospi_info.pixel_width * 2;
-	pix->sizeimage = lep->lep_vospi_info.total_data_byte_size;
+	pix->bytesperline = LEPTON_SUBFRAME_LINE_BYTE_WIDTH;
+	pix->sizeimage = lep->lep_vospi_info.subframe_params.subframe_data_byte_size;
 	return 0;
 }
 static int lepton_s_parm(struct file *file, void *priv,
@@ -212,8 +212,8 @@ static int lepton_enum_framesizes(struct file *file, void *priv,
 	if (f->index != 0)
 		return -EINVAL;
 	f->type = V4L2_FRMSIZE_TYPE_DISCRETE;
-	f->discrete.width = lep->lep_vospi_info.pixel_width;
-	f->discrete.height = lep->lep_vospi_info.line_count;
+	f->discrete.width = LEPTON_SUBFRAME_LINE_WORD_COUNT;
+	f->discrete.height = lep->lep_vospi_info.subframe_params.line_count;
 	return 0;
 }
 
@@ -282,7 +282,7 @@ int lepton_queue_setup(struct vb2_queue *vq,
 	unsigned int size = -1;
 
 	lep = vb2_get_drv_priv(vq);
-	size = lep->lep_vospi_info.total_data_byte_size;
+	size = lep->lep_vospi_info.subframe_params.subframe_data_byte_size;
 	if (*nplanes)
 	{
 		// only allow 1 plane per buffer, and verify size is large enough
@@ -303,7 +303,7 @@ int lepton_buf_prepare(struct vb2_buffer *vb)
 	struct lepton *lep = NULL;
 
 	lep = vb2_get_drv_priv(vb->vb2_queue);
-	if (vb2_plane_size(vb, 0) < lep->lep_vospi_info.total_data_byte_size)
+	if (vb2_plane_size(vb, 0) < lep->lep_vospi_info.subframe_params.subframe_data_byte_size)
 	{
 		pr_debug("%s: data will not fit into buf size %ld\n", __func__, vb2_plane_size(vb, 0));
 		return -EINVAL;
@@ -311,7 +311,7 @@ int lepton_buf_prepare(struct vb2_buffer *vb)
 
 	/* amount of data that will be filled in this buffer,
 	 * which will get passed to userspace client in buffer descriptor */
-	vb2_set_plane_payload(vb, 0, lep->lep_vospi_info.total_data_byte_size);
+	vb2_set_plane_payload(vb, 0, lep->lep_vospi_info.subframe_params.subframe_data_byte_size);
 	return 0;
 }
 
@@ -576,7 +576,7 @@ static irqreturn_t lepton_vsync_handler(int irq, void *data)
 		vaddr = vb2_plane_vaddr(&lep_buf->buf, 0);
 		dma_addr = vb2_dma_contig_plane_dma_addr(&lep_buf->buf, 0);
 		// printk(KERN_INFO "SPI read into %p (%u)\n", vaddr, dma_addr);
-		rx_len = lep->lep_vospi_info.subframe_data_byte_size;
+		rx_len = lep->lep_vospi_info.subframe_params.subframe_data_byte_size;
 		memset(vaddr, 0xa5, rx_len); //@@@@@
 		lepton_start_transfer(lep, vaddr, dma_addr, rx_len);
 	}
@@ -716,7 +716,7 @@ static int lepton_probe(struct spi_device *spi)
 	}
 	/* spare rx buffer when not using allocated V4L buf is subframe size + 1 line 
 	 * so that eventually we will sync up if we start out in middle of a subframe */
-	lep->spare_buf.len = lep->lep_vospi_info.subframe_data_byte_size + LEPTON_SUBFRAME_LINE_BYTE_WIDTH;
+	lep->spare_buf.len = lep->lep_vospi_info.subframe_params.subframe_data_byte_size + LEPTON_SUBFRAME_LINE_BYTE_WIDTH;
 	lep->spare_buf.rx_buf = dma_zalloc_coherent(dev, lep->spare_buf.len, &lep->spare_buf.rx_dma, GFP_KERNEL);
 	if (lep->spare_buf.rx_buf == NULL) {
 		dev_err(dev, "failed to allocate SPI rx buffer");
