@@ -20,7 +20,7 @@
 
 // constants for collecting the subframe index from Lepton 3.x subframes
 #define LEPTON3_SUBFRAME_INDEX_LINE1 20
-#define LEPTON3_SUBFRAME_INDEX_BYTE 1
+#define LEPTON3_SUBFRAME_INDEX_BYTE 0
 #define LEPTON3_SUBFRAME_INDEX_LINE1_BYTE1_MASK 0x70
 #define LEPTON3_SUBFRAME_INDEX_LINE2 21
 #define LEPTON3_SUBFRAME_INDEX_LINE2_BYTE1_MASK 0x10
@@ -73,21 +73,26 @@ unsigned char *get_line_from_subframe(unsigned short *subframe_data, int line_no
 int is_subframe_line_counter_valid(lepton_vospi_info *lep_info, unsigned short *subframe_data);
 
 /*
- * Given a lepton_vospi_info struct pointer, a pointer to 16-bit sub-frame
- * data, and an expected next index, check whether the subframe index (1-based)
- * is valid.
+ * Given a lepton_vospi_info struct pointer, and a pointer to 16-bit sub-frame
+ * data, check whether the subframe index (1-based) is valid.
  *
  * The lep_info struct's next_subframe_index member may be changed by
  * this function.
  */
-int is_subframe_index_valid(lepton_vospi_info *lep_info, unsigned short *subframe_data, int expected_index);
+int is_subframe_index_valid(lepton_vospi_info *lep_info, unsigned short *subframe_data);
 
 /*
- * Extract pixel data from one entire frame collected over SPI.
+ * Extract pixel data from one subframe collected over SPI.
  *
+ * For Lepton 3.x, the same pixel_data struct should be used for 4 subframes.
+ * Marks the frame as 'done' when all subframes have been received.
  * lep_info: The struct holding lepton VOSPI parameters.
  * received_frame: The raw unprocessed data received from the kernel driver.
- * pixel_data: A pre-allocated buffer (size lep_info->total
+ * pixel_data: A pre-allocated buffer (sized for pixel width * pixel height)
+ * done: Set to 1 if the pixel_data buffer is ready.
+ * Returns 0 normally, >0 for the number of line counter errors encountered.
  */
-// int extract_pixel_data(lepton_vospi_info *lep_info, unsigned short *received_frame, unsigned short *pixel_data);
+int extract_pixel_data(lepton_vospi_info *lep_info, unsigned short *received_frame, unsigned short *pixel_data,
+					  int *done);
+
 
