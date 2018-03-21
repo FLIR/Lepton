@@ -1,5 +1,10 @@
 *.o
 *.a
-.*.swp
+.*
 tags
 lepton_control/vsync_app
+lepton_module/*.mod.c
+lepton_module/Module.symvers
+lepton_module/lepton.ko
+lepton_data_collector/lepton_data_collector
+lepton_vospi_lib/test_lepton_driver_lib
