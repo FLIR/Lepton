@@ -1,4 +1,4 @@
-/* FLIR_Lepton.c
+/* flir_lepton.c
    Main source file for the FLIR Lepton VoSPI driver
  */
 
@@ -24,7 +24,7 @@
 #include <media/videobuf2-dma-contig.h>
 #include <media/videobuf2-memops.h>
 
-#include "FLIR_Lepton.h"
+#include "flir_lepton.h"
 #include "lepton_vospi_funcs.h"
 
 enum lepton_model {

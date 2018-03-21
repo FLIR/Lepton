@@ -1,4 +1,4 @@
 obj-m := lepton.o 
 
-lepton-y := FLIR_Lepton.o lepton_vospi_funcs.o
+lepton-y := flir_lepton.o lepton_vospi_funcs.o
 
