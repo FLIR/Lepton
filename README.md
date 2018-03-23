@@ -88,10 +88,15 @@ already be set for the `make menuconfig` step.
 
 ### Update the Lepton SDK (optional)
 Download the latest SDK from
-<http://www.flir.com/cores/display/?id=51878#leptonSDK-32-radiometric>, and
-unpack it into the `lepton_sdk/` subdirectory below this working directory.
-This is needed for compiling a simple I2C application that commands the Lepton
-to begin sending VSYNC pulses from its GPIO3 output.
+<http://www.flir.com/cores/display/?id=51878#leptonSDK-32-radiometric>.
+Move aside the `lepton_sdk/FLIR_I2C.c` and `lepton_sdk/Makefile` files and
+unpack the SDK into the `lepton_sdk/` subdirectory below this working
+directory.  Compare the old `FLIR_I2C.c` file with the new and copy in the
+portions that add support for the BeagleBone Green (look for strings starting
+with `bbg_` and for the `BEAGLEBONE_GREEN_I2C` define.  The new SDK's Makefile
+should be overwritten with the backed-up version that was moved aside.  The SDK
+is used for compiling a simple I2C application that commands the Lepton to
+begin sending VSYNC pulses from its GPIO3 output.
 
 ## BBB setup
 
