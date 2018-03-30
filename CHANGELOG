@@ -1,0 +1,8 @@
+v1.0.1
+* Minor lepton_data_collector app bug fixed
+* Lepton 2.X duplicate frames no longer set "done"
+* Updated documentation
+
+v1.0
+* initial release
+
