@@ -156,6 +156,7 @@ int extract_pixel_data(lepton_vospi_info *lep_info, unsigned short *received_fra
 	int *done) {
 	int first_pixel_line = 0;
 	unsigned char *subframe_line = NULL;
+	unsigned int lep2_frame_crc_sum = 0;
 	int linecount_errs = 0;
 	int subframe_index = 0;
 	int subframe_offset = 0;
@@ -193,12 +194,20 @@ int extract_pixel_data(lepton_vospi_info *lep_info, unsigned short *received_fra
 		if (subframe_line[1] != (i+first_pixel_line)) {
 			linecount_errs++;
 		}
+		if (lep_info->lep_version == LEPTON_VERSION_2X) {
+			lep2_frame_crc_sum += ((unsigned short *)subframe_line)[1];
+		}
 		/* Skip over line counter and CRC bytes */
 		subframe_line += 4;
 		memcpy((unsigned char*)&pixel_data[subframe_offset+i*LEPTON_SUBFRAME_LINE_PIXEL_WIDTH], subframe_line,
 				LEPTON_SUBFRAME_LINE_PIXEL_WIDTH*2);
 	}
-	if ((subframe_index == 0) || (subframe_index == 4)) {
+	if ((subframe_index == 0) && (lep2_frame_crc_sum != lep_info->last_crc_sum)) {
+		/* This Lepton 2.X frame isn't a duplicate, so pass it on */
+		lep_info->last_crc_sum = lep2_frame_crc_sum;
+		*done = 1;
+	}
+	else if (subframe_index == 4) {
 		*done = 1;
 	}
 	return linecount_errs;

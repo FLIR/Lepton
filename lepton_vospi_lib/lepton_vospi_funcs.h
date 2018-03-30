@@ -50,6 +50,7 @@ typedef struct _lepton_vospi_info_t {
 	unsigned int next_subframe_index;	// filled in by
 						//  init_lepton_info(), used
 						//  internally.
+	unsigned int last_crc_sum; // filled in for Lepton 2 for frame comparisons
 	struct subframe_parameters subframe_params;
 	struct image_parameters image_params;
 } lepton_vospi_info;
