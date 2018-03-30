@@ -208,8 +208,8 @@ not used for Lepton 2.X).
 
 ### Pixel data extraction
 The `extract_pixel_data()` function places image data into its `pixel_data`
-parameter.  Its `done` output parameter will be set to 1 for all Lepton 2.X
-frames, or when the last subframe from a Lepton 3.X has been received, and
+parameter.  Its `done` output parameter will be set to 1 for all unique Lepton
+2.X frames, or when the last subframe from a Lepton 3.X has been received, and
 signals that the full frame of pixel data is ready for storage or transmission
 (the same unchanged `pixel_data` buffer should be passed in until `done` is set
 to 1).
