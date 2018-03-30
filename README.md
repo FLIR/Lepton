@@ -237,6 +237,9 @@ and load the driver (`depmod` is only needed the first time):
 # depmod -a
 # modprobe lepton dyndbg=+p
 ```
+(If the lepton module was loaded at boot-up, the latency debugging should be
+set up separately; create a new file `lepton.conf` under `/etc/modprobe.d/`
+with the contents: `options lepton dyndbg=+p`, then reboot)
 
 This is the time to determine whether the frame loss rate is acceptable or
 not, as the driver will continuously perform SPI DMA transfers in order to
@@ -248,8 +251,8 @@ discard packets in subsequent frames until either it recovers or the Lepton
 is reset.
 
 Reducing latency is a complicated subject, but sources of latency in the kernel
-can be discovered using ftrace (this tool was used to discover the high latency
-introduced by the CPU idle code).
+can be discovered using ftrace (this tool was used to discover 8 to 9
+millisecond latency introduced by the CPU idle code).
 Other sources of latency include unnecessary processes started up at boot time,
 so if using the debian distribution, it may help to disable unused server
 applications using the `systemctl` command.
