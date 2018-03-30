@@ -93,17 +93,31 @@ static void process_image(const void *p, int size)
                                 snprintf(out_path, sizeof(out_path), "%s%06d.gray", out_file_prefix,
                                         frame_number);
                                 out_file = fopen(out_path, "wb");
-                                if (!out_file) {
-                                        /* indicate failure to store image
-                                         * frame */
+                                if (out_file) {
+                                        fwrite(pixel_data, sizeof(unsigned short),
+                                        lep_info.image_params.pixel_width*lep_info.image_params.pixel_height,
+                                        out_file);
+                                        fclose(out_file);
+                                        /* image stored */
+                                        fflush(stderr);
+                                        fprintf(stderr, "*");
+                                }
+                                else {
+                                        /* failed to store image frame */
                                         fflush(stderr);
                                         fprintf(stderr, "G");
                                 }
-                                fwrite(pixel_data, sizeof(unsigned short),
-                                        lep_info.image_params.pixel_width*lep_info.image_params.pixel_height,
-                                        out_file);
-                                fclose(out_file);
                                 frame_number++;
+                        }
+                        if (lc_errs == 0) {
+                                /* raw frame received successfully */
+                                fflush(stderr);
+                                fprintf(stderr, ".");
+                        }
+                        else {
+                                /* bad line counter found in raw frame */
+                                fflush(stderr);
+                                fprintf(stderr, "%d", lc_errs);
                         }
                 }
                 else {
@@ -112,16 +126,6 @@ static void process_image(const void *p, int size)
                          */
                         fflush(stderr);
                         fprintf(stderr, "-");
-                }
-                if (lc_errs == 0) {
-                        /* indicate raw frame stored successfully */
-                        fflush(stderr);
-                        fprintf(stderr, ".");
-                }
-                else {
-                        /* indicate bad line counter failure in raw frame */
-                        fflush(stderr);
-                        fprintf(stderr, "%d", lc_errs);
                 }
         }
         else {
