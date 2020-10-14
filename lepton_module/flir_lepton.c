@@ -685,7 +685,6 @@ static int lepton_probe(struct spi_device *spi)
 		goto unreg_video_and_v4l_device;
 	}
 
-	q->dev = dev;
 	q->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 //	q->io_modes = VB2_MMAP | VB2_DMABUF | VB2_READ; //@@@ is DMABUF freebie with vb2 boilerplate?
 	q->io_modes = VB2_MMAP | VB2_READ;
