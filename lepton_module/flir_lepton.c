@@ -611,7 +611,7 @@ static int lepton_probe(struct spi_device *spi)
 
 	/* set 32-bit DMA mask for allocation of video buffers
 	 */
-	of_dma_configure(dev, of_node); 
+	of_dma_configure(dev, of_node, true); 
 	ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(32));
 	if (ret) {
 		dev_err(dev, "failed to set DMA mask, err %d", ret);
