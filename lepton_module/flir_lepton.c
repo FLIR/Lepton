@@ -56,7 +56,7 @@ struct lepton {
 	struct lepton_buffer *current_lep_buf;
 	struct spi_transfer *spi_xfer;
 	struct spi_message *spi_msg;
-	struct timespec last_spi_done_ts;
+	struct timespec64 last_spi_done_ts;
 };
 
 struct lepton_buffer {
@@ -409,10 +409,10 @@ static void lepton_spi_done_callback(void *context)
 	unsigned long flags;
 	unsigned short *subframe_data = NULL;
 	struct lepton_buffer *lep_buf = NULL;
-	struct timespec now;
+	struct timespec64 now;
 	bool subframe_is_good = false;
 
-	ktime_get_ts(&now);
+	ktime_get_ts64(&now);
 
 	spin_lock_irqsave(&lep->lock, flags);
 	lep->last_spi_done_ts.tv_sec = now.tv_sec;
@@ -482,9 +482,9 @@ static void lepton_start_transfer(struct lepton *lep, void *rx_buf, dma_addr_t r
 	spi_async(lep->spi_dev, lep->spi_msg);
 }
 
-static int lepton_timing_ok(struct lepton *lep, struct timespec *now)
+static int lepton_timing_ok(struct lepton *lep, struct timespec64 *now)
 {
-	struct timespec delta;
+	struct timespec64 delta;
 	int timing_ok = 1;
 
 	if (lep->last_spi_done_ts.tv_sec == 0) {
@@ -492,7 +492,7 @@ static int lepton_timing_ok(struct lepton *lep, struct timespec *now)
 		timing_ok = 0;
 	}
 	else {
-		delta = timespec_sub(*now, lep->last_spi_done_ts);
+		delta = timespec64_sub(*now, lep->last_spi_done_ts);
 		if (delta.tv_nsec < MINIMUM_SPI_TRANSFER_QUIET_TIME) {
 			pr_debug("VSYNC warning!\n");
 		}
@@ -511,9 +511,9 @@ static irqreturn_t lepton_vsync_handler(int irq, void *data)
 	dma_addr_t dma_addr;
 	int synced = 0;
 	unsigned rx_len;
-	struct timespec now;
+	struct timespec64 now;
 
-	ktime_get_ts(&now); /* time at beginning of IRQ handler */
+	ktime_get_ts64(&now); /* time at beginning of IRQ handler */
 	dev = &spi->dev;
 	lep = dev_get_drvdata(dev);
 
@@ -717,7 +717,7 @@ static int lepton_probe(struct spi_device *spi)
 	/* spare rx buffer when not using allocated V4L buf is subframe size + 1 line 
 	 * so that eventually we will sync up if we start out in middle of a subframe */
 	lep->spare_buf.len = lep->lep_vospi_info.subframe_params.subframe_data_byte_size + LEPTON_SUBFRAME_LINE_BYTE_WIDTH;
-	lep->spare_buf.rx_buf = dma_zalloc_coherent(dev, lep->spare_buf.len, &lep->spare_buf.rx_dma, GFP_KERNEL);
+	lep->spare_buf.rx_buf = dma_alloc_coherent(dev, lep->spare_buf.len, &lep->spare_buf.rx_dma, GFP_KERNEL);
 	if (lep->spare_buf.rx_buf == NULL) {
 		dev_err(dev, "failed to allocate SPI rx buffer");
 		ret = -ENOMEM;
