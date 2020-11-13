@@ -1,51 +1,82 @@
-#include <dt-bindings/pinctrl/am33xx.h>
-#include <dt-bindings/interrupt-controller/irq.h>
-
 /dts-v1/;
 /plugin/;
 
-/ {
-	compatible = "ti,beaglebone", "ti,beaglebone-black", "ti,beaglebone-green";
+/* Wired up as follows on the Raspberry Pi 3:
+	CS -> BCM/GPIO 8 (CEO)
+	MOSI -> BCM/GPIO 10 (MOSI)
+	MISO -> BCM/GPIO 9 (MISO)
+	CLK -> BCM/GPIO 11 (SCLK)
+	GND -> GROUND
+	VIN -> POWER 3v3
+	SDA -> BCM/GPIO 2 (SDA)
+	SCL -> BCM/GPIO 3 (SCL)
+	VSYNC ->
+*/
 
-	/* identification */
-	part-number = "BB-SPIDEV0";
+/ {
+	compatible = "brcm,bcm2837", "brcm,bcm2708", "brcm,bcm2709";
+
 	version = "00A0";
 
 	/* state the resources this cape uses */
 	exclusive-use =
 		/* the pin header uses */
-		"P9.17",	/* spi0_cs0 */
-		/* "P9.18",*/	/* spi0_d1 MOSI */
-		"P9.21",	/* spi0_d0 MISO */
-		"P9.22",	/* spi0_sclk */
-		"P8.17",	/* gpmc_ad11.gpio0_27 VSYNC */
+		// SPI0_CS0
+		"GPIO8",
+		// SPI0_D0 MISO
+		"GPIO10",
+		// SPI0_SCLK
+		"GPIO11",
+		// VSYNC
+		"GPIO17",
+
+
 		/* the hardware ip uses */
 		"spi0";
 
+	// Disables SPIDEV
 	fragment@0 {
-		target = <&am33xx_pinmux>;
+		target = <&spi0>;
 		__overlay__ {
-			/* default state has all gpios released and mode set to uart1 */
-			bb_spi0_pins: pinmux_bb_spi0_pins {
-				pinctrl-single,pins = <
-					AM33XX_IOPAD(0x950, PIN_INPUT_PULLUP | MUX_MODE0)	/* spi0_sclk, INPUT_PULLUP | MODE0 */
-					AM33XX_IOPAD(0x954, PIN_INPUT_PULLUP | MUX_MODE0)	/* spi0_d0, INPUT_PULLUP | MODE0 */
-					AM33XX_IOPAD(0x95c, PIN_OUTPUT_PULLUP | MUX_MODE0)	/* spi0_cs0, OUTPUT_PULLUP | MODE0 */
-					AM33XX_IOPAD(0x82C, PIN_INPUT_PULLDOWN | MUX_MODE7)	/* gpmc_ad11.gpio0_27 VSYNC */
-				>;
+			status = "okay";
+
+			spidev@0 {
+				status = "disabled";
+			};
+
+			spidev@1 {
+				status = "disabled";
 			};
 		};
 	};
 
+	/* So this fragment is an overlay for the current GPIO settings, which
+	   will adjust the default values when applied. Another fragment is
+	   needed to apply this overlay */
 	fragment@1 {
+		// Configuration for the GPIO pin controller
+		target = <&gpio>;
+		__overlay__ {
+			/* default state has all gpios released and mode set to uart1 */
+			rpi_spi_pins: rpi_spi_pins {
+				brcm,pins = <11 9 8 17>; // clk, d0, cs0, VSYNC
+				brcm,function = <4 4 1 0>; // <SPI SPI OUTPUT INPUT>
+				brcm,pull = <1 1 2 1>; // 2 = PULLUP, 1  = PULLDOWN
+			};
+		};
+	};
+
+	/* Overlays the GPIO fragment and contains Lepton-specific configuration */
+	fragment@2 {
 		target = <&spi0>;
 		__overlay__ {
+			/* AVOIDS DTC WARNING */
 			#address-cells = <1>;
 			#size-cells = <0>;
 
 			status = "okay";
 			pinctrl-names = "default";
-			pinctrl-0 = <&bb_spi0_pins>;
+			pinctrl-0 = <&rpi_spi_pins>;
 
 			lepton2 {
 				#address-cells = <1>;
@@ -56,7 +87,7 @@
 				/* SPI setup
 				 *
 				 * lepton SPI mode 3: CPHA = 1, CPOL = 1
-				 * p. 50 Lepton with Radiometry Datasheet (500-0736-01-09 rev 110) 
+				 * p. 50 Lepton with Radiometry Datasheet (500-0736-01-09 rev 110)
 				 */
 				reg = <0>;
 				spi-max-frequency = <24000000>;
@@ -64,8 +95,8 @@
 				spi-cpol;
 
 				/* VSYNC setup */
-				interrupt-parent = <&gpio0>;
-				interrupts = <27 IRQ_TYPE_EDGE_RISING>;
+				interrupt-parent = <&gpio>;
+				interrupts = <17 0x00000001>;
 			};
 		};
 	};
