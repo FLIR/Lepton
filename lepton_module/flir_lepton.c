@@ -74,8 +74,6 @@ static int lepton_querycap(struct file *file, void *priv,
 	strlcpy(cap->driver, LEPTON_MODULE_NAME, sizeof(cap->driver));
 	strlcpy(cap->card, "FLIR Lepton", sizeof(cap->driver));
 	snprintf(cap->bus_info, sizeof(cap->bus_info), "platform:%s", LEPTON_MODULE_NAME);
-	cap->device_caps = V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_READWRITE | V4L2_CAP_STREAMING;
-	cap->capabilities = cap->device_caps | V4L2_CAP_DEVICE_CAPS;
 	return 0;
 }
 
@@ -268,6 +266,8 @@ static struct video_device lepton_videodev_template = {
 	.ioctl_ops	= &lepton_ioctl_ops,
 	.minor		= -1,
 	.release	= video_device_release,
+	.device_caps	= V4L2_CAP_VIDEO_CAPTURE | V4L2_CAP_READWRITE |
+			  V4L2_CAP_STREAMING,
 };
 
 /*
