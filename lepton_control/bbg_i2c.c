@@ -44,7 +44,7 @@ int debug_level = DEBUG;
 #define DEBUG_DUMP(level, dptr, dformatwidth, dcount, per_line) {}
 #endif
 
-#define I2C_DEVICE_FILE "/dev/i2c-2"
+#define I2C_DEVICE_FILE "/dev/i2c-1"
 
 #define ADDRESS_WIDTH 2  // in bytes
 
