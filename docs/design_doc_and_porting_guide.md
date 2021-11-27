@@ -66,42 +66,42 @@ The private data used by the driver is contained in `struct lepton`.  It
 contains the mutex and lock needed for protecting the other struct fields while
 being updated.  The following briefly describes the other struct members:
 
-* started - A user-space application has sent the START_STREAMING ioctl to the
-  driver; cleared when the STOP_STREAMING ioctl is received
+* `started` - A user-space application has sent the `START_STREAMING` ioctl to the
+  driver; cleared when the `STOP_STREAMING` ioctl is received
 
-* synced - The previous frame had a valid line counter in its last video data
+* `synced` - The previous frame had a valid line counter in its last video data
   packet, so valid data should now be received in subsequent packets; reset
   when an invalid data packet is encountered
 
-* telemetry_enabled - This is a placeholder for adding telemetry support
+* `telemetry_enabled` - This is a placeholder for adding telemetry support
 
-* unfilled_bufs - Holds a linked list of available buffers queued by user space
+* `unfilled_bufs` - Holds a linked list of available buffers queued by user space
 
-* spare_buf - A struct containing spare buffer parameters; the spare buffer is
+* `spare_buf` - A struct containing spare buffer parameters; the spare buffer is
   used when no buffers have been queued from user space (usually because no
   application is running), and is sized to hold one extra line for
   synchronization
 
-* v4l2_dev, vid_dev - Structs used by the V4L2 subsystem
+* `v4l2_dev`, `vid_dev` - Structs used by the V4L2 subsystem
 
-* q - A struct used by videobuf2
+* `q` - A struct used by videobuf2
 
-* spi_dev - A struct used by the SPI subsystem
+* `spi_dev` - A struct used by the SPI subsystem
 
-* vsync_count - A simple interrupt counter
+* `vsync_count` - A simple interrupt counter
 
-* lep_vospi_info - A struct used by the lepton_vospi_lib functions, used for
+* `lep_vospi_info` - A struct used by the `lepton_vospi_lib` functions, used for
   properly sizing the SPI DMA buffer (the size will be variable once telemetry
   is supported)
 
-* current_lep_buf - Holds the address of last queued buffer removed from the
-  unfilled_bufs list, used by the DMA completion function to de-queue buffers
+* `current_lep_buf` - Holds the address of last queued buffer removed from the
+  `unfilled_bufs` list, used by the DMA completion function to de-queue buffers
   back to user space
 
-* spi_xfer, spi_msg - Used in interrupt context for setting up async SPI DMA
+* `spi_xfer`, `spi_msg` - Used in interrupt context for setting up async SPI DMA
   transfers
 
-* last_spi_done_ts - Timestamp set during DMA completion to check for
+* `last_spi_done_ts` - Timestamp set during DMA completion to check for
   timing problems
 
 #### V4L2 and videobuf2 ioctl callbacks
@@ -109,20 +109,20 @@ Following the private struct declarations are the callbacks used for V4L2
 ioctl()s, along with the `lepton_set_fmt_fields()` function that fills in the
 raw video format parameters returned to user space by a few of the callbacks.
 
-Next, the lepton_fops and lepton_ioctl_ops structs are filled in; the
-lepton_fops callbacks are delegated to V4L2 and videobuf2 functions, and the
-lepton_ioctl_ops callbacks point to the V4L2 ioctl functions declared above.
-The lepton_videodev_template struct is then defined using these structs for
-its fops and ioctl_ops members.
+Next, the `lepton_fops` and `lepton_ioctl_ops` structs are filled in; the
+`lepton_fops` callbacks are delegated to V4L2 and videobuf2 functions, and the
+`lepton_ioctl_ops` callbacks point to the V4L2 ioctl functions declared above.
+The `lepton_videodev_template` struct is then defined using these structs for
+its `fops` and `ioctl_ops` members.
 
 The next section defines the videobuf2 ioctl() callbacks, which are then
-referenced by the lepton_video_qops struct.  These callbacks are used for
+referenced by the `lepton_video_qops` struct.  These callbacks are used for
 buffer management and also start and stop streaming.
 
 #### Device tree info
-The following structs, lepton_id_table and lepton_of_match, are used during the
+The following structs, `lepton_id_table` and `lepton_of_match`, are used during the
 driver probe to locate the correct device tree node.  These are referenced
-later in the lepton_spi_driver definition.
+later in the `lepton_spi_driver` definition.
 
 #### Interrupt handling
 By this point, the setup code is mostly complete, and the meat of the driver
@@ -157,11 +157,11 @@ functions:
     - `synced` and `discard_count` - These are set based on whether the
       recieved frame had a valid line count in its last video data packet
 
-If the current_lep_buf copy was non-NULL and the recieved frame looked ok, the buffer
-will then be de-queued with the VB2_BUF_STATE_DONE flag set; if the frame was
-bad, the VB2_BUF_STATE_ERROR flag will be set to warn the user-space
-application that data corruption has occurred (this is expected to be
-recoverable), and a `Lost frame sync!` debug message will be sent to dmesg.
+If the `current_lep_buf` copy was non-NULL and the received frame looked ok,
+the buffer will then be de-queued with the `VB2_BUF_STATE_DONE` flag set; if
+the frame was bad, the `VB2_BUF_STATE_ERROR` flag will be set to warn the
+user-space application that data corruption has occurred (this is expected to
+be recoverable), and a `Lost frame sync!` debug message will be sent to dmesg.
 
 #### Driver probe
 The next function `lepton_probe()` is called when the module is loaded and a
@@ -178,7 +178,7 @@ needed structs was allocated using `devm_kzalloc()` and is therefore expected
 to be automatically freed when the module is unloaded.
 
 #### SPI subsystem initialization
-The lepton_spi_driver definition completes the driver code, referencing the
+The `lepton_spi_driver` definition completes the driver code, referencing the
 `lepton_of_match` and `lepton_id_table` structs and `lepton_probe()` and
 `lepton_remove()` functions declared above, before being passed on to
 `module_spi_driver()`.
