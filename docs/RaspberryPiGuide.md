@@ -4,7 +4,7 @@
 
 This guide is for the newer breakout board (seen here). Earlier versions of the breakout board do not include ```VSYNC```.
 
-![Correct breakout board](https://lepton.flir.com/wp-content/uploads/2015/06/1.jpg)
+![Correct breakout board](images/rpi/breakout1.jpg)
 
 ## Requirements
 
@@ -25,7 +25,7 @@ This guide is for the newer breakout board (seen here). Earlier versions of the 
   - Labelled as __4__.
 - Some additional software that can be found [here](FIXME put link here).
 
-![Labelled hardware requirements](https://lepton.flir.com/wp-content/uploads/2019/01/2-1.jpg)
+![Labelled hardware requirements](images/rpi/hardware.jpg)
 
 ## Hardware
 
@@ -33,7 +33,7 @@ This guide is for the newer breakout board (seen here). Earlier versions of the 
 
 You can find more information on the GPIO and the pinout of the RaspberryPi [here](https://www.raspberrypi.org/documentation/usage/gpio/). Attach (female-to-male) jumper wires between the following breakout board pins and the RaspberryPi board:
 
-![Labelled breakout board](https://lepton.flir.com/wp-content/uploads/2019/01/breakout_labelled.jpg)
+![Labelled breakout board](images/rpi/breakout_labelled.jpg)
 
 - (J2 Pin) -> (Proper name) -> (RPi connector pin)
 - P8 -> SCL -> GPIO 3
@@ -45,7 +45,7 @@ You can find more information on the GPIO and the pinout of the RaspberryPi [her
 
 We will also need to connect power and ground to the board:
 
-![Labelled breakout board](https://lepton.flir.com/wp-content/uploads/2019/01/vin_gnd.jpg)
+![Labelled breakout board](images/rpi/vin_gnd.jpg)
 
 - (J3 Pin) -> (Proper name)
 - P1 (__Square pin__) -> GROUND
@@ -70,7 +70,7 @@ Insert the MicroSD into your computer. You will need to find out the location of
 lsblk
 ```
 
-![Labelled breakout board](https://lepton.flir.com/wp-content/uploads/2018/12/lsblk-1.png)
+![Labelled breakout board](images/rpi/lsblk-1.png)
 
 A prebuilt image for the `PI` can be found in the `RaspberryPi` folder, with the name `raspberry_pi.img`. This contains the kernel setup with the kernel module for the `lepton` camera preinstalled.
 
