@@ -54,10 +54,10 @@ system.  This should be the bulk of the porting work required for Linux.
 
 ### High-level driver code walkthrough
 The driver code can be found in the file
-`lepton_vospi_driver/lepton_module/flir_lepton.c`, which has a corresponding
-header file `lepton_vospi_driver/lepton_module/flir_lepton.h`.  Code, defines,
+`Lepton/lepton_module/flir_lepton.c`, which has a corresponding
+header file `Lepton/lepton_module/flir_lepton.h`.  Code, defines,
 and structures specific to the Lepton video data format have been placed in a
-separate set of files found in `lepton_vospi_driver/lepton_vospi_lib/` so they
+separate set of files found in `Lepton/lepton_vospi_lib/` so they
 can be shared with user-space code; the files have been soft-linked into the
 `lepton_module/` directory to simplify the build.
 
