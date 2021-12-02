@@ -88,7 +88,8 @@ already be set for the `make menuconfig` step.
 
 ### Update the Lepton SDK (optional)
 Download the latest SDK from
-<http://www.flir.com/cores/display/?id=51878#leptonSDK-32-radiometric>.
+<https://www.flir.com/developer/lepton-integration/lepton-integration-windows/>
+(see "Lepton SDK and Documentation" link).
 Move aside the `lepton_sdk/FLIR_I2C.c` and `lepton_sdk/Makefile` files and
 unpack the SDK into the `lepton_sdk/` subdirectory below this working
 directory.  Compare the old `FLIR_I2C.c` file with the new and copy in the
