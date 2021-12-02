@@ -665,7 +665,7 @@ static int lepton_probe(struct spi_device *spi)
 
 	*vid_dev = lepton_videodev_template;
 	vid_dev->v4l2_dev = v4l2_dev;
-	ret = video_register_device(vid_dev, VFL_TYPE_GRABBER, -1);
+	ret = video_register_device(vid_dev, VFL_TYPE_VIDEO, -1);
 	if (ret) {
 		/* now have non-devm (i.e. not automatically released when
 		   owning device struct is gone) resources to free */
