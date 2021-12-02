@@ -44,7 +44,7 @@ provoke the Lepton into its error state; adding GPIOs to control the Lepton
 power-down and reset lines via software is also recommended).
 
 ### Device tree fragment for Lepton
-A device tree fragment in `flir-lepton-00A0.dts` is used for configuring which
+A device tree fragment in `flir-lepton-$PLATFORM.dts` is used for configuring which
 SPI controller and SPI settings (CPHA, CPOL, I/O pins, bus speed, etc) are to
 be used by the Lepton, as well as which GPIO to register for the VSYNC IRQ.
 The driver parses the device tree entry to register the IRQ when the module

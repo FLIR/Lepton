@@ -157,14 +157,14 @@ The Lepton device tree bindings assigns it to the SPI0 controller, enables the
 VSYNC input on connector P8 pin 17 as an IRQ source, sets up the SPI clock at
 its maximum 24MHz rate (the next step down, 16MHz, results in latency issues),
 configures the SPI pins, and sets CPOL=1 and CPHA=1 to match the Lepton.
-The device tree source file, `flir-lepton-00A0.dts`, is currently found in the
+The device tree source file, `flir-lepton-BBB.dts`, is currently found in the
 `lepton_module/` subdirectory of the source code repository.  It's simplest to
 build it from inside the `bb.org-overlays` repo, which has the include files
 for building device tree overlays for the BBB:
 ```
-$ git clone https://github.com/beagleboard/bb.org-overlays
+$ git clone https://github.com/beagleboard/bb.org-overlays -b legacy-dtc-1.4.4
 $ cd bb.org-overlays/src/arm
-$ ln -s /path/to/Lepton/lepton_module/flir-lepton-00A0.dts .
+$ ln -s /path/to/Lepton/lepton_module/flir-lepton-BBB.dts .
 $ cd ../..
 $ make
 ```
@@ -177,7 +177,7 @@ $ make DTC=$KDIR/scripts/dtc/dtc
 ```
 This is only needed if the system's dtc compiler is too old, or isn't installed.
 
-When successful, the `flir-lepton-00A0.dtbo` file (output to
+When successful, the `flir-lepton-BBB.dtbo` file (output to
 `bb.org-overlays/src/arm`) may then be copied to the uSD card into the
 `/lib/firmware/` directory.
 
@@ -217,14 +217,14 @@ parameter for more verbose output during boot.
 
 The device tree bindings should also be added to this file.  Edit a line in the 
 `Additional custom capes` section, and change E.G. `<file4>` to
-`flir-lepton-00A0`.
+`flir-lepton-BBB`.
 For example, change:
 ```
 #uboot_overlay_addr4=/lib/firmware/<file4>.dtbo
 ```
 to
 ```
-uboot_overlay_addr4=/lib/firmware/flir-lepton-00A0.dtbo
+uboot_overlay_addr4=/lib/firmware/flir-lepton-BBB.dtbo
 ```
 (remember to remove the comment character).
 
