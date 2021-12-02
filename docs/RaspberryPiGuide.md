@@ -248,7 +248,7 @@ user@desktop:~ $ cd ~/linux
 user@desktop:~/linux $ make -j $(nproc) oldconfig zImage modules 
 user@desktop:~/linux $ cd ~/rpi-lepton/lepton_module
 user@desktop:~/rpi-lepton/lepton_module $ make -C ~/linux M=$PWD modules 
-user@desktop:~/rpi-lepton/lepton_module $ ~/linux/scripts/dtc/dtc flir-lepton-00A0.dts -o flir-lepton-00A0.dtbo
+user@desktop:~/rpi-lepton/lepton_module $ ~/linux/scripts/dtc/dtc flir-lepton-RPI.dts -o flir-lepton-RPI.dtbo
 ```
 
 Ignore any warnings that come from compiling. 
@@ -293,7 +293,7 @@ pi@raspberrypi:~/rpi-lepton/lepton_module $ sudo depmod -a
 You will need to install the ```.dtbo``` file into the overlays folder.
 
 ```bash
-pi@raspberrypi:~/rpi-lepton/lepton_module $ sudo cp flir-lepton-00A0.dtbo /boot/overlays/
+pi@raspberrypi:~/rpi-lepton/lepton_module $ sudo cp flir-lepton-RPI.dtbo /boot/overlays/
 ```
 
 You will then need to uncomment following values for flags in ```/boot/config.txt```:
@@ -313,7 +313,7 @@ pi@raspberrypi:~ $ sudo nano /boot/config.txt
 This will enable i2c and spi after the Raspberry Pi is rebooted. Alongside uncommenting these, you will also need to add the following line:
 
 ```
-dtoverlay=flir-lepton-00A0
+dtoverlay=flir-lepton-RPI
 ```
 
 This will enable the overlay you just built. You will need to reboot the RaspberryPi for the changes to ```config.txt``` to take effect.
