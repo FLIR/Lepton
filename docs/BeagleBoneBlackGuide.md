@@ -142,13 +142,13 @@ VSYNC pulses from its GPIO3 output and the user-space data collector
 application by running `make` from the top-level directory (the same directory
 containing this README).
 ```
-$ cd /path/to/lepton_vospi_driver/
+$ cd /path/to/Lepton/
 $ make
 ```
 
 Next, build the kernel module:
 ```
-$ cd /path/to/lepton_vospi_driver/lepton_module/
+$ cd /path/to/Lepton/lepton_module/
 $ make
 ```
 
@@ -164,7 +164,7 @@ for building device tree overlays for the BBB:
 ```
 $ git clone https://github.com/beagleboard/bb.org-overlays
 $ cd bb.org-overlays/src/arm
-$ ln -s /path/to/lepton_vospi_driver/lepton_module/flir-lepton-00A0.dts .
+$ ln -s /path/to/Lepton/lepton_module/flir-lepton-00A0.dts .
 $ cd ../..
 $ make
 ```
@@ -188,11 +188,11 @@ applications with `mkdir lepton_vospi`.
 Use scp or copy the following files directly to the uSD card in the new
 directory:
 
-* `/path/to/lepton_vospi_driver/lepton_control/vsync_app`
+* `/path/to/Lepton/lepton_control/vsync_app`
 
-* `/path/to/lepton_vospi_driver/lepton_module/lepton.ko`
+* `/path/to/Lepton/lepton_module/lepton.ko`
 
-* `/path/to/lepton_vospi_driver/lepton_data_collector/lepton_data_collector`
+* `/path/to/Lepton/lepton_data_collector/lepton_data_collector`
 
 In order to be able to use `modprobe` rather than `insmod` to load the module,
 install the module alongside the other kernel modules (example commands assume
