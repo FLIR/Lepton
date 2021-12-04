@@ -74,8 +74,8 @@
 #pragma comment (lib, "AdvApi32.lib")
 #endif
 
-/* BeagleBone Green include */
-#include "bbg_i2c.h"
+/* Linux i2c device include */
+#include "lep_i2cdev.h"
 
 /******************************************************************************/
 /** LOCAL DEFINES                                                            **/
@@ -101,7 +101,7 @@ LEP_UINT8 rx[I2C_BUFFER_SIZE];
 /******************************************************************************/
 /** PRIVATE DATA DECLARATIONS                                                **/
 /******************************************************************************/
-LEP_PROTOCOL_DEVICE_E masterDevice = BEAGLEBONE_GREEN_I2C;
+LEP_PROTOCOL_DEVICE_E masterDevice = LINUX_I2CDEV_I2C;
 Aardvark handle;
 
 LEP_CMD_PACKET_T cmdPacket;
@@ -284,8 +284,8 @@ fprintf(stderr, "You are here.  masterDevice is: %d\n", (int)masterDevice);
 		
        break;
 #endif
-   case BEAGLEBONE_GREEN_I2C:
-       if (bbg_init_i2c() != 0)
+   case LINUX_I2CDEV_I2C:
+       if (i2cdev_init() != 0)
        {
            return(LEP_ERROR_CREATING_COMM);
        }
@@ -332,8 +332,8 @@ LEP_RESULT DEV_I2C_MasterClose()
 		closesocket(ConnectSocket);
    break;
 #endif
-   case BEAGLEBONE_GREEN_I2C:
-       bbg_close_i2c();
+   case LINUX_I2CDEV_I2C:
+       i2cdev_close();
        break;
    case AARDVARK_I2C:
    default:
@@ -363,7 +363,7 @@ LEP_RESULT DEV_I2C_MasterReset(void )
 
        break;
 
-   case BEAGLEBONE_GREEN_I2C:
+   case LINUX_I2CDEV_I2C:
        break;
 
    case AARDVARK_I2C:
@@ -455,8 +455,8 @@ LEP_RESULT DEV_I2C_MasterReadData(LEP_UINT16  portID,               // User-defi
 
 		break;
 #endif
-   case BEAGLEBONE_GREEN_I2C:
-        bytesActuallyRead = bbg_read_byte_data_i2c(txdata, rxdata, bytesToRead);
+   case LINUX_I2CDEV_I2C:
+        bytesActuallyRead = i2cdev_read_byte_data(txdata, rxdata, bytesToRead);
         if(bytesActuallyRead != bytesToRead)
         {
             result = LEP_ERROR_I2C_FAIL;
@@ -573,8 +573,8 @@ LEP_RESULT DEV_I2C_MasterWriteData(LEP_UINT16  portID,              // User-defi
 
 		break;
 #endif
-   case BEAGLEBONE_GREEN_I2C:
-        bytesActuallyWritten = bbg_write_byte_data_i2c(txdata, bytesToWrite);
+   case LINUX_I2CDEV_I2C:
+        bytesActuallyWritten = i2cdev_write_byte_data(txdata, bytesToWrite);
         if(bytesActuallyWritten != bytesToWrite)
         {
             result = LEP_ERROR;
