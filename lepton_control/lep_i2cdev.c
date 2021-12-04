@@ -1,5 +1,5 @@
-// BeagleBone Green Lepton I2C user-space control
-// bbg_i2c.c
+// Lepton I2C user-space control
+// lep_i2cdev.c
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,7 +16,7 @@
 #include "LEPTON_Macros.h"
 #include "LEPTON_I2C_Reg.h"
 
-#include "bbg_i2c.h"
+#include "lep_i2cdev.h"
 
 #define DEBUG 5
 
@@ -44,14 +44,16 @@ int debug_level = DEBUG;
 #define DEBUG_DUMP(level, dptr, dformatwidth, dcount, per_line) {}
 #endif
 
-#define I2C_DEVICE_FILE "/dev/i2c-1"
+#ifndef I2C_DEVICE_FILE
+#error I2C_DEVICE_FILE should be defined in CFLAGS
+#endif
 
 #define ADDRESS_WIDTH 2  // in bytes
 
 int lepton_i2c_fd = -1;
 
 // Fixed to I2C2
-int bbg_init_i2c()
+int i2cdev_init()
 {
     DEBUG_PRINT(5, "%s() called.\n", __func__)
     if (lepton_i2c_fd >= 0)
@@ -77,7 +79,7 @@ int bbg_init_i2c()
     return 0;
 }
 
-void bbg_close_i2c()
+void i2cdev_close()
 {
     DEBUG_PRINT(5, "%s() called.\n", __func__)
     if (lepton_i2c_fd >= 0)
@@ -88,7 +90,7 @@ void bbg_close_i2c()
     DEBUG_PRINT(2, "I2C device closed.\n")
 }
 
-int bbg_read_byte_data_i2c(LEP_UINT8 *rx_adr, LEP_UINT8 *rx_data, LEP_UINT32 rx_size)
+int i2cdev_read_byte_data(LEP_UINT8 *rx_adr, LEP_UINT8 *rx_data, LEP_UINT32 rx_size)
 {
     int read_count = 0;
 
@@ -112,7 +114,7 @@ int bbg_read_byte_data_i2c(LEP_UINT8 *rx_adr, LEP_UINT8 *rx_data, LEP_UINT32 rx_
     return read_count;
 }
 
-int bbg_write_byte_data_i2c(LEP_UINT8 *tx_data, LEP_UINT32 tx_size)
+int i2cdev_write_byte_data(LEP_UINT8 *tx_data, LEP_UINT32 tx_size)
 {
     int write_count = 0;
 
