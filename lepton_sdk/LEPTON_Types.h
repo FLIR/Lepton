@@ -216,7 +216,7 @@ extern "C"
         /* I2C Devices */
         AARDVARK_I2C = 0,
         DEV_BOARD_FTDI_V2,
-        BEAGLEBONE_GREEN_I2C,
+        LINUX_I2CDEV_I2C,
         //C232HM_DDHSL_0,
 		TCP_IP,
 
