@@ -593,6 +593,7 @@ static int lepton_probe(struct spi_device *spi)
 {
 	struct lepton *lep = NULL;
 	struct device *dev = NULL;
+	struct device *dma_dev = NULL; /* device that can do DMA allocations */
 	struct device_node *of_node = NULL;
 	struct v4l2_device *v4l2_dev = NULL;
 	struct video_device *vid_dev = NULL;
@@ -608,15 +609,10 @@ static int lepton_probe(struct spi_device *spi)
 		return -EINVAL;
 	}
 
-
-	/* set 32-bit DMA mask for allocation of video buffers
+	/* V4L2 DMA buffer allocations will use same device that SPI controller
+	 * normally uses for DMA mapping
 	 */
-	of_dma_configure(dev, of_node, true); 
-	ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(32));
-	if (ret) {
-		dev_err(dev, "failed to set DMA mask, err %d", ret);
-		return -EINVAL;
-	}
+	dma_dev = spi->master->dev.parent;
 
 	/* lepton struct keeps track of both video and spi-related structs,
 	 * and will be available in driver callbacks via private data pointers
@@ -646,7 +642,7 @@ static int lepton_probe(struct spi_device *spi)
 		dev_err(dev, "failed to allocate v4l2 struct");
 		return -ENOMEM;
 	}
-    ret = v4l2_device_register(dev, v4l2_dev);
+	ret = v4l2_device_register(dev, v4l2_dev);
 	if (ret) {
 		dev_err(dev, "failed to register v4l2");
 		return ret;
@@ -685,7 +681,7 @@ static int lepton_probe(struct spi_device *spi)
 		goto unreg_video_and_v4l_device;
 	}
 
-	q->dev = dev;
+	q->dev = dma_dev;
 	q->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 //	q->io_modes = VB2_MMAP | VB2_DMABUF | VB2_READ; //@@@ is DMABUF freebie with vb2 boilerplate?
 	q->io_modes = VB2_MMAP | VB2_READ;
@@ -717,7 +713,7 @@ static int lepton_probe(struct spi_device *spi)
 	/* spare rx buffer when not using allocated V4L buf is subframe size + 1 line 
 	 * so that eventually we will sync up if we start out in middle of a subframe */
 	lep->spare_buf.len = lep->lep_vospi_info.subframe_params.subframe_data_byte_size + LEPTON_SUBFRAME_LINE_BYTE_WIDTH;
-	lep->spare_buf.rx_buf = dma_zalloc_coherent(dev, lep->spare_buf.len, &lep->spare_buf.rx_dma, GFP_KERNEL);
+	lep->spare_buf.rx_buf = dma_zalloc_coherent(dma_dev, lep->spare_buf.len, &lep->spare_buf.rx_dma, GFP_KERNEL);
 	if (lep->spare_buf.rx_buf == NULL) {
 		dev_err(dev, "failed to allocate SPI rx buffer");
 		ret = -ENOMEM;
