@@ -63,10 +63,18 @@ following config options should be set:
 
     - `CONFIG_VIDEOBUF2_DMA_CONTIG=m`,
 
+        + NOTE: To enable this in kernel 5.X, enable the `Deinterlace support`
+          option as a module in the `Memory-to-memory multimedia devices` menu,
+          or set `CONFIG_VIDEO_MEM2MEM_DEINTERLACE=m` in the .config file.
+
     - `CONFIG_VIDEOBUF2_VMALLOC=m`
 
-  (These can also be set to `=y`, to skip the requirement to load these
-  modules before loading the Lepton module). 
+    (These can also be set to `=y`, to skip the requirement to load these
+    modules before loading the Lepton module).
+
+* Depending on the boot scripts available inside the root FS, it may be
+  necessary to build libcomposite as a module.  If the USB net device
+  is not appearing, try changing it to a module by setting `CONFIG_USB_CONFIGFS=m`.
 
 The instructions for building the kernel found at
 <https://eewiki.net/display/linuxonarm/BeagleBone+Black#BeagleBoneBlack-TIBSP>
