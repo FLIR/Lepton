@@ -137,13 +137,13 @@ built.
 
 ### Building the driver and applications
 First, set up the environment so that the correct toolchain and kernel
-source directory can be found.
+source directory can be found.  The Linaro toolchain can be downloaded from the
+Beaglebone getting started guide at
+<https://forum.digikey.com/t/debian-getting-started-with-the-beaglebone-black/12967#BeagleBoneBlack-TIBSP>
 ```
-$ export PATH=$PATH:/path/to/ti-linux-kernel-dev/dl/gcc-linaro.../bin
-$ export CROSS_COMPILE=arm-linux-gnueabihf-
-$ export KDIR=/path/to/ti-linux-kernel-dev/KERNEL
+$ # this is the toolchain for building the applications, see below for module
+$ export CROSS_COMPILE=/path/to/linaro_toolchain/bin/arm-linux-gnueabihf-
 ```
-(Replace gcc-linaro... with the directory name found under `dl/`).
 
 Next, build the I2C application that commands the Lepton to begin transmitting
 VSYNC pulses from its GPIO3 output and the user-space data collector
@@ -154,8 +154,13 @@ $ cd /path/to/Lepton/
 $ make
 ```
 
-Next, build the kernel module:
+Next, build the kernel module.   The cross compile setting needs to match the
+GCC version used for the kernel and can be found inside the `.CC` file
+alongside the `build_kernel.sh` script used to build the kernel.
 ```
+$ # this is the toolchain for building the module, see above for application
+$ export CROSS_COMPILE=/path/to/cross_compiler/bin/arm-linux-gnueabi-
+$ export KDIR=/path/to/ti-linux-kernel-dev/KERNEL
 $ cd /path/to/Lepton/lepton_module/
 $ make
 ```
