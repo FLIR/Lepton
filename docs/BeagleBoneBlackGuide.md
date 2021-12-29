@@ -82,9 +82,9 @@ were successfully used to build the kernel with the above .config changes, as
 well as to build the Lepton kernel module code out-of-tree.  Running the
 `build_kernel.sh` step will pop up a `make menuconfig` ncurses window for
 changing the kernel config settings, and when complete produces a kernel
-zImage, a modules tarball, the kernel configuration, firmware, and device-tree
-binaries under the `deploy/` subdirectory, checks out the kernel source under
-the `KERNEL/` subdirectory, and downloads a toolchain beneath the `dl/`
+zImage, a modules tarball, the kernel configuration, and device-tree binaries
+under the `deploy/` subdirectory, checks out the kernel source under the
+`KERNEL/` subdirectory, and downloads a toolchain beneath the `dl/`
 subdirectory.  Beware that this script takes a very long time to run and
 requires network access.  Subsequent builds can be made to run much faster by
 editing the script and commenting out the `FULL_REBUILD=1` line and adding
@@ -126,8 +126,6 @@ card mount point, and `<version string>` with the actual version string):
 * `config-<version string>` into `/path/to/usd/card/boot/`
 
 * unpack `<version string>-modules.tar.gz` into `/path/to/usd/card`
-
-* unpack `<version string>-firmware.tar.gz` into `/path/to/usd/card/lib/firmware`
 
 * unpack `<version string>-dtbs.tar.gz` into `/path/to/usd/card/boot/dtbs/<version string>`
 
