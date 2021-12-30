@@ -3,7 +3,7 @@ Software Drivers and Applications for Communicating With the FLIR® Lepton Camer
 
 Use the code in this repository to add Lepton support to embedded Linux systems.
 
-The target Linux kernel version for this git branch is 5.4.
+The target Linux kernel version for this git branch is 5.10.
 
 [Beagle Bone Black Guide](docs/BeagleBoneBlackGuide.md)
 
