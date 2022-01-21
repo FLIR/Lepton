@@ -2,18 +2,23 @@
 
 ## Disclaimer
 
-This guide is for the newer breakout board (seen here). Earlier versions of the breakout board do not include ```VSYNC```.
+This guide is for the newer breakout board (seen here). Earlier versions of the breakout board do not include `VSYNC`.
 
 ![Correct breakout board](images/rpi/breakout1.jpg)
 
 ## Requirements
 
 - A computer with the ability to read/write to MicroSD cards
-  - A laptop using Linux was used during this guide.
-- A RaspberryPi 2/3
+  - A laptop running Ubuntu Linux 18.04 was used during this guide.
+- A RaspberryPi 2/3/4
   - You can find them [here](https://www.digikey.com/products/en/development-boards-kits-programmers/evaluation-boards-embedded-mcu-dsp/786?k=Raspberry+Pi&k=&pkeyword=Raspberry+Pi&pv1742=726&sf=0&FV=ffe00312&quantity=&ColumnSort=0&page=1&pageSize=25).
   - A MicroUSB to USB-A cable.
-  - A MicroSD card with at least 8GB of capacity. MicroSD cards preinstalled with NOOBs can be found [here](https://thepihut.com/collections/raspberry-pi-sd-cards-and-adapters/products/noobs-preinstalled-sd-card).
+  - A MicroSD card with at least 8GB of capacity.
+    - As NOOBs is now deprecated, images can be downloaded from https://www.raspberrypi.com/software/operating-systems/
+    - The "Legacy" OS version at time of writing is based on debian Buster.
+    - The latest OS version at time of writing is based on debian Bullseye.
+    - The instructions below were tested using manual installations of both the legacy and latest versions of
+      Raspberry Pi OS Lite.
   - Labelled as __1__.
 - A Lepton camera (2.X/3.X)
   - They can be found [here](https://www.digikey.com/products/en/sensors-transducers/image-sensors-camera/532?k=&pkeyword=&s=48165&s=64527&sf=0&FV=ffe00214&quantity=&ColumnSort=0&page=1&pageSize=25). For a higher resolution and telemetry data, it is recommended that you use a [Lepton 3.5](https://www.digikey.com/product-detail/en/flir/500-0771-01/500-0771-01-ND/7606616).
@@ -23,7 +28,6 @@ This guide is for the newer breakout board (seen here). Earlier versions of the 
   - Labelled as __3__.
 - Female-to-Female Jumper cables
   - Labelled as __4__.
-- Some additional software that can be found [here](FIXME put link here).
 
 ![Labelled hardware requirements](images/rpi/hardware.jpg)
 
@@ -31,7 +35,7 @@ This guide is for the newer breakout board (seen here). Earlier versions of the 
 
 ### Attaching the breakout board to the RPi
 
-You can find more information on the GPIO and the pinout of the RaspberryPi [here](https://www.raspberrypi.org/documentation/usage/gpio/). Attach (female-to-male) jumper wires between the following breakout board pins and the RaspberryPi board:
+You can find more information on the GPIO and the pinout of the RaspberryPi [here](https://www.raspberrypi.org/documentation/usage/gpio/). Attach (female-to-female) jumper wires between the following breakout board pins and the RaspberryPi board:
 
 ![Labelled breakout board](images/rpi/breakout_labelled.jpg)
 
@@ -55,268 +59,396 @@ We will also need to connect power and ground to the board:
 
 You have two options for setting up the Micro SD:
 
-<!-- - Using a prebuilt image
-  - For this guide we will assume you have access to a linux terminal and a Micro SD card reader.
-  - It will come with a kernel, kernel modules and device tree already setup. -->
+- Use the Imager utility
+- Install the image manually
 
-- Using NOOBs to get an image
-- Building the image manually
+Before beginning an install, prepare a micro SD card (WARNING: its contents will be overwritten) with a minimum capacity of 8 GB.
 
-<!-- ##### Prebuilt image
+#### Imager utility
 
-Insert the MicroSD into your computer. You will need to find out the location of the SD card. The following command will give you that information:
+Insert the target micro SD card into the host machine's micro SD card reader slot.
+
+Install the imager package available from https://www.raspberrypi.com/software/
+onto a host computer system.
+
+If installing the Ubuntu version, first check that the system is running the
+latest stable version (20.04 at time of writing).  Open a terminal window, and
+navigate to the directory containing the downloaded .deb file (try opening the
+downloads folder from the web browser window to find the location).  From
+there, run the following command:
 
 ```bash
-lsblk
+$ sudo apt install ./imager*.deb
 ```
 
-![Labelled breakout board](images/rpi/lsblk-1.png)
-
-A prebuilt image for the `PI` can be found in the `RaspberryPi` folder, with the name `raspberry_pi.img`. This contains the kernel setup with the kernel module for the `lepton` camera preinstalled.
+Enter the superuser password if prompted.  If all goes well, the imager
+application can then be run:
 
 ```bash
-sudo dd bs=4M if=raspberry_pi.img of=/dev/<SDCARDNAME> status=progress
+$ rpi-imager
 ```
 
-Once this is complete, you can insert it into your Raspberry Pi. -->
+Select the version of Raspberry Pi OS from the "Operating System" control (the
+"Raspberry Pi OS Lite" option from the "Raspberry Pi OS (other)" menu is the
+fastest install option), and the SD card device from the "Storage" control, and
+click "Write".  Enter the superuser password if prompted.
 
-#### NOOBs
+#### Manual install
 
-You will need to install the latest Raspbian image to the MicroSD, which can be found [here](https://www.raspberrypi.org/downloads/). The simplest way of installing the new image would be through the Raspberry Pi Foundation's [NOOBs New Out Of the Box software](https://www.raspberrypi.org/downloads/noobs/).
+Download one of the Raspberry Pi OS images from
+https://www.raspberrypi.com/software/operating-systems/.
 
-A full guide to installing with NOOBs can be found [here](https://www.raspberrypi.org/learning/software-guide/quickstart/).
+Follow the manual instructions for your host machine's platform here:
+https://www.raspberrypi.com/documentation/computers/getting-started.html#downloading-an-image
 
-When installing through NOOBs, you will be walked through the installation and updating the raspberrypi to the latest version. 
-
-#### Manually
-
-If you want to install it manually, some instructions can be found [here](https://www.raspberrypi.org/documentation/installation/installing-images/README.md).
+In Linux, be careful to double-check which device files belong to the SD card,
+since overwriting the wrong partition *will result in data loss*.
 
 ## Software
 
-This guide takes the approach of cross-compiling the lepton driver from a
-separate Linux development workstation (or a Linux VM running on a development workstation).
-Doing a kernel compile on a workstation is normally *far* faster than doing
-it natively on the Raspberry Pi itself.
-
-### Collecting source code and build information
-
-This whole section will be performed on the Raspberry Pi itself, so boot up the
-Pi. We will need access to a terminal and an internet connection. There are
-some dependencies, install them using the following command:
-
-```bash
-pi@raspberrypi:~ $ sudo apt install git bc flex
-```
-
-Now acquire the kernel source code that matches the running kernel:
-
-```bash
-pi@raspberrypi:~ $ git clone https://github.com/RPi-Distro/rpi-source
-pi@raspberrypi:~ $ # this will download the matching kernel source
-pi@raspberrypi:~ $ ./rpi-source/rpi-source --nomake
-```
-
-and a copy of the current kernel config:
-
-```bash
-pi@raspberrypi:~ $ sudo modprobe configs 
-pi@raspberrypi:~ $ cp /proc/config.gz ~/
-pi@raspberrypi:~ $ gunzip ~/config.gz
-pi@raspberrypi:~ $ chmod 644 ~/config
-```
-
-Determine the current versions of OS version, kernel compiler, source code:
-
-```bash
-pi@raspberrypi:~ $ # make note of OS version for later step of selecting which toolchain to install
-pi@raspberrypi:~ $ cat /etc/debian_version
-pi@raspberrypi:~ $ # make note of compiler version for later step of selecting which toolchain to install
-pi@raspberrypi:~ $ grep -o "gcc version \S*" /proc/version
-pi@raspberrypi:~ $ # make note of kernel version for later step of selecting the lepton driver code to build
-pi@raspberrypi:~ $ grep -o "Linux version \S*" /proc/version
-```
+This guide describes how to cross-compile the lepton driver on a separate Linux development workstation (or a Linux VM
+running on a development workstation), or alternatively on the Raspberry Pi itself.  Note that compiling a kernel
+on a workstation is normally *far* faster than on the Raspberry Pi.
 
 ### Installing build tools for the Pi onto a Linux build host
+
+When building the kernel directly on the Raspberry Pi, skip to the next
+section.
+
+Check https://www.raspberrypi.com/documentation/computers/linux_kernel.html#cross-compiling-the-kernel
+for up-to-date instructions.  The kernel build steps described below in the "Build the Raspberry Pi kernel package"
+section should be similar, except for building a Debian package containing the kernel image.
 
 Perform this task on your Linux workstation (or Linux VM, if that's all you have available).
 Pretty much any Linux distribution will work, but if you're using something other than Debian or Ubuntu
 (or one of their derivatives, such as Mint) then you'll need to figure out local equivalents for
-this suggested ```apt``` command to install build dependencies.
+this suggested `apt` command to install build dependencies.
 
 ```bash
-user@desktop:~ $ sudo apt install git bc flex bison libncurses5-dev libssl1.0-dev rsync
+user@desktop:~ $ sudo apt install git bc bison flex libssl-dev make libc6-dev libncurses5-dev
 ```
 
-The cross-compiler toolchain that you install needs to be compatible with
-the kernel and modules running on your Raspberry Pi. The Raspberry Pi project 
-stuck with one toolchain version across many releases of the OS, but recently
-switched to a new toolchain.
-
-* If your compiler version on the Pi was reported as ```gcc 4.9.3```, install "old toolchain"
-* Otherwise, install "new toolchain"
-
-
-#### Install old cross-compiler toolchain
-
-
-[This is the toolchain](https://github.com/raspberrypi/tools) that was used to create many releases of Raspberry Pi OS
+Next, install the cross-compile toolchain.  The Ubuntu distribution conveniently provides a single package that will pull in the right dependencies:
 
 ```bash
-user@desktop:~ $ git clone git://github.com/raspberrypi/tools.git
-user@desktop:~ $ export PATH=$PWD/tools/arm-bcm2708/arm-rpi-4.9.3-linux-gnueabihf/bin:$PATH
+user@desktop:~ $ sudo apt install crossbuild-essential-armhf
 ```
 
-#### Install new cross-compiler toolchain
+For other Linux distributions, go to https://github.com/abhiTronix/raspberry-pi-cross-compilers to download a pre-built toolchain for the appropriate Debian version running on the Raspberry Pi (the latest is "Bullseye" at time of writing), and follow the installation instructions.
 
+### Collecting source code and build information
 
-[This toolchain project](https://github.com/abhiTronix/raspberry-pi-cross-compilers) provides a variety of toolchains, so you will need to select the one that matches the OS version and gcc version reported on your Pi. 
+Some information needs to be collected from the Raspberry Pi before we begin.
 
-[https://github.com/abhiTronix/raspberry-pi-cross-compilers/wiki/Cross-Compiler:-Installation-Instructions#b-download-binary](https://github.com/abhiTronix/raspberry-pi-cross-compilers/wiki/Cross-Compiler:-Installation-Instructions#b-download-binary)
+Insert the programmed SD card into the Raspberry Pi, connect a USB keyboard, an
+HDMI monitor (see
+https://www.raspberrypi.com/documentation/computers/getting-started.html#connecting-a-display),
+and a mouse (if a desktop OS is installed) to it, and power it on.
 
-Look here to translate the OS version number from your Pi to one of the listed codenames 
-(e.g. "10.4" is called "buster"):
-[https://en.wikipedia.org/wiki/Debian_version_history](https://en.wikipedia.org/wiki/Debian_version_history)
+If the "Lite" version of Raspberry Pi OS is installed, the startup will result
+in a text display and a `login:` prompt.  When the login prompt appears, supply
+the default `pi` username and `raspberry` password.
 
-After downloading the matching toolchain, follow the "Temporary Installation" instructions,
-which includes setting both ```PATH``` and ```LD_LIBRARY_PATH``` environment variables
+Desktop versions of the Raspberry Pi OS will enter a graphical environment at
+startup.  See
+https://www.raspberrypi.com/documentation/computers/using_linux.html#terminal
+if needed for help starting up a terminal window.
 
-[https://github.com/abhiTronix/raspberry-pi-cross-compilers/wiki/Cross-Compiler:-Installation-Instructions#c1-temporary-installation-use-these-binaries-directly-recommended](https://github.com/abhiTronix/raspberry-pi-cross-compilers/wiki/Cross-Compiler:-Installation-Instructions#c1-temporary-installation-use-these-binaries-directly-recommended)
+Connect the Raspberry Pi to a network, either with a network cable, or see
+https://www.raspberrypi.com/documentation/computers/configuration.html#configuring-networking
+for help setting up wifi.
 
-### Prepare source code on build host
-
-The kernel code and kernel config were acquired earlier using the Raspberry Pi, 
-to make sure they are consistent with what is currently installed on the Pi.
-Copy them onto your build host now. Note the destination path for ```config```, 
-including the added dot.
+At the shell prompt, run the following commands to update the system (this may
+take a long time):
 
 ```bash
-user@desktop:~ $ rsync -avz pi@raspberrypi.local:linux/ ~/linux/
-user@desktop:~ $ rsync -avz pi@raspberrypi.local:config ~/linux/.config
+pi@raspberrypi:~ $ sudo apt update
+pi@raspberrypi:~ $ sudo apt upgrade -y
 ```
 
-If you have trouble reaching your pi on the network as "raspberry-pi.local",
-you can try [these tips](https://www.raspberrypi.org/documentation/remote-access/ip-address.md)
-to find its IP address and substitute that address instead.
-
-Next, unpack the lepton source code. The link to lepton source was given in
-"Requirements" section, so it can be directly downloaded to your build host. 
-Unpack that code (adust the path if the file got downloaded somewhere other than
-"Downloads" folder):
+When the upgrade finishes, reboot the Raspberry Pi:
 
 ```bash
-user@desktop:~ $ tar -xvf ~/Downloads/rpi-lepton.tar.gz
+pi@raspberrypi:~ $ sudo reboot
 ```
 
-The lepton source code needs to be configured to match the kernel version
-on your Pi. Use the pattern 'kernel-X.Y' below, where X.Y is a placeholder
-for the first two parts of the actual version number. For instance, if the
-kernel version was reported earlier as "Linux version 5.4.51-v7+"
+Once it has started up again, log in or open a terminal window as before.
+
+Display the kernel package version:
 
 ```bash
-user@desktop:~ $ cd ~/rpi-lepton/lepton_module
-user@desktop:~/rpi-lepton/lepton_module$ git checkout kernel-5.4
+pi@raspberrypi:~ $ dpkg -l | grep raspberrypi-kernel
+ii  raspberrypi-kernel                   1:1.20211118-3                   armhf        Raspberry Pi bootloader
 ```
 
-Be sure to use the version that matches your Pi version, e.g. replace
-"kernel-5.4" with "kernel-4.19" if your Pi is still running 4.19.
+Keep track of the displayed version (`1:1.20211118-3` in this example), for checking out the matching tag of the
+Linux source code.
 
-### Cross-compile software on build host
+Display the contents of `/proc/version' to find the Linux kernel version contained in the package:
 
-This whole section will be performed on your Linux build host, rather than on the Pi itself.
-First set up the environment in the command terminal where you are working: 
+```bash
+pi@raspberrypi:~ $ cat /proc/version
+Linux version 5.10.63-v7+ (dom@buildbot) (arm-linux-gnueabihf-gcc-8 (Ubuntu/Linaro 8.4.0-3ubuntu1) 8.4.0, GNU ld (GNU Binutils for Ubuntu) 2.34) #1488 SMP Thu Nov 18 16:14:44 GMT 2021
+```
+
+The version string `5.10.63-v7+` will be helpful when checking out the right version of the Lepton software.
+
+(Optional) If enabling SSH access, it is a very good idea to change the default system password using the `passwd`
+command, and keep a copy of the new password in a secure location.
+
+```bash
+pi@raspberrypi:~ $ passwd
+```
+
+(Optional) Set up the SSH secure shell server for remote access, if building the kernel on a desktop system:
+
+```bash
+pi@raspberrypi:~ $ sudo systemctl enable ssh
+pi@raspberrypi:~ $ sudo systemctl start ssh
+```
+
+Find the Raspberry Pi's IP address for remote access using the `/sbin/ifconfig` command, or follow the instructions
+found here:
+https://www.raspberrypi.com/documentation/computers/remote-access.html#ip-address .
+If using a desktop machine that supports avahi, the Pi can be connected to at `raspberrypi.local`.
+
+Copy the kernel configuration file to /tmp:
+
+```bash
+pi@raspberrypi:~ $ sudo modprobe configs
+pi@raspberrypi:~ $ cp /proc/config.gz /tmp
+pi@raspberrypi:~ $ gunzip /tmp/config.gz
+pi@raspberrypi:~ $ chmod 644 /tmp/config
+```
+
+On a desktop machine, start up a web browser and look at
+https://github.com/raspberrypi/linux/tags to find a git tag corresponding to
+the version of raspberrypi-kernel found above (`1:1.20211118-3` in the
+example).  The 8-digit number is in fact a date encoded as YYYYMMDD, and it is
+this date that should match the tag.  The tag matching package version
+`1:1.20211118-3` is `stable_20211118`.
+
+### Build the Raspberry Pi kernel package
+
+This section may be performed on the Raspberry Pi itself, if it has at least 1
+GB of RAM, or using a cross-compiler set up on a separate workstation as
+described previously.  The unpacked kernel source will require over 1 GB of
+free space.  An additional 1 GB or so will be needed for the kernel compile, so
+overall there should be 2 GB or more free space on the machine used to build
+the kernel.
+
+If building on the Raspberry Pi, install kernel build pre-requisites using the following command:
+
+```bash
+pi@raspberrypi:~ $ sudo apt install git flex bison libssl-dev bc libncurses5-dev
+```
+
+Now, download the .zip file from github onto the build machine:
+
+```bash
+# Replace "stable_20211118" with the tag found on github, if different.
+pi@raspberrypi:~ $ wget https://github.com/raspberrypi/linux/archive/refs/tags/stable_20211118.zip
+pi@raspberrypi:~ $ unzip stable_20211118.zip
+pi@raspberrypi:~ $ ln -s linux-stable_20211118 linux
+pi@raspberrypi:~ $ cd linux
+```
+
+Copy the current kernel config:
+
+```bash
+# When compiling on the Raspberry Pi
+pi@raspberrypi:~/linux $ cp /tmp/config .config
+
+# When cross-compiling on a desktop machine
+# Use the Pi's IP address in place of "raspberrypi.local" if avahi is not available
+user@desktop:~/linux $ scp pi@raspberrypi.local:/tmp/config .config
+```
+
+If cross-compiling the kernel, set up environment variables used by the kernel build:
+
+```bash
+user@desktop:~/linux $ export ARCH=arm
+user@desktop:~/linux $ export CROSS_COMPILE=arm-linux-gnueabihf-
+```
+
+(Optional) Modify the kernel config as needed with `make menuconfig`.  The following config options need to be set as follows to support the Lepton kernel module (the default Pi config had the correct settings at time of writing):
+```
+#CONFIG_CPU_IDLE is not set
+CONFIG_DMA_ENGINE=y
+CONFIG_VIDEOBUF2_CORE=m
+CONFIG_VIDEOBUF2_MEMOPS=m
+CONFIG_VIDEOBUF2_DMA_CONTIG=m
+CONFIG_VIDEOBUF2_VMALLOC=m
+```
+
+Build the debian kernel binary package.
+This took over 3 hours on a Raspberry Pi 3 model B, so be prepared for a long wait if compiling natively.  As a comparison, an Intel i7 8-core laptop can cross-compile the kernel source in less than 15 minutes:
+
+```bash
+pi@raspberrypi:~/linux $ make -j $(nproc) bindeb-pkg LOCALVERSION=-lepton
+```
+
+When the build succeeds, it will place the .deb files in the parent directory, which in this case is the user's home directory.
+
+```bash
+pi@raspberrypi:~/linux $ ls ..
+linux
+linux-5.10.63-v7-lepton_5.10.63-v7-lepton-1_armhf.buildinfo
+linux-5.10.63-v7-lepton_5.10.63-v7-lepton-1_armhf.changes
+linux-headers-5.10.63-v7-lepton_5.10.63-v7-lepton-1_armhf.deb
+linux-image-5.10.63-v7-lepton_5.10.63-v7-lepton-1_armhf.deb
+linux-libc-dev_5.10.63-v7-lepton-1_armhf.deb
+```
+
+If the kernel was cross-compiled on a separate machine, copy the kernel binary package to the Raspberry Pi:
+
+```bash
+user@desktop:~/linux $ scp ../linux-image*.deb pi@raspberrypi.local:
+```
+
+### Install the built kernel
+
+Run the commands in this section on the Raspberry Pi.
+
+Install the linux-image package:
+
+```bash
+pi@raspberrypi:~/linux $ cd
+pi@raspberrypi:~ $ sudo dpkg -i linux-image*.deb
+```
+
+Create a separate overlay directory in /boot and copy the new kernel package's
+overlays into it:
+
+```bash
+pi@raspberrypi:~ $ sudo mkdir /boot/linux_image_overlays
+pi@raspberrypi:~ $ sudo cp /usr/lib/linux-image*/overlays/* /boot/linux_image_overlays
+```
+
+Edit the `/boot/config.txt` file to select the new kernel for the next boot:
+
+```bash
+pi@raspberrypi:~ $ sudo nano /boot/config.txt
+```
+
+The following new lines should be added (run `ls /boot` to find the exact file names for the installed kernel image and initrd, if the kernel version string differs):
+
+```
+kernel=vmlinuz-5.10.63-v7-lepton
+initramfs initrd.img-5.10.63-v7-lepton followkernel
+overlay_prefix=linux_image_overlays/  # Don't overlook the final '/' character.
+```
+
+Remove the '#' character from the first column of the following lines:
+
+```
+#dtparam=i2c_arm=on
+#dtparam=i2s=on
+#dtparam=spi=on
+```
+
+Save the changes to the `boot.config` file, reboot the Raspberry Pi, and log in once again.  If the kernel install was successful, you should see the new version in `/proc/version`:
+
+```bash
+pi@raspberrypi:~ $ cat /proc/version
+Linux version 5.10.63-v7-lepton (flir@laptop) (arm-linux-gnueabihf-gcc (Ubuntu/Linaro 7.5.0-3ubuntu1~18.04) 7.5.0, GNU ld (GNU Binutils for Ubuntu) 2.30) #1 SMP Wed Jan 19 13:18:02 PST 2022
+```
+
+### Build Lepton source code on build host
+
+The operations in this section need to run on the same host that built the Linux kernel, either the Raspberry Pi
+itself, or cross-compiled on a desktop machine.
+
+Clone the Lepton source code repository:
+
+```bash
+user@desktop:~ $ cd
+user@desktop:~ $ git clone https://github.com/FLIR/Lepton.git
+```
+
+If not building on the Raspberry Pi, set up the cross-compile environment variables:
 
 ```bash
 user@desktop:~ $ export ARCH=arm
 user@desktop:~ $ export CROSS_COMPILE=arm-linux-gnueabihf-
-user@desktop:~ $ export export LOCALVERSION="+"
 ```
 
-Verify that ```PATH``` (and maybe ```LD_LIBRARY_PATH```, depending on which toolchain is installed)
-are still set per the toolchain instructions followed earlier, and set them again if 
-needed.
+The Lepton source code needs to be configured to match the kernel version
+on your Pi. Use the pattern 'kernel-X.Y' below, where X.Y is a placeholder
+for the first two parts of the actual version number. For instance, for the
+kernel version reported earlier as "Linux version 5.10.63-v7+":
 
 ```bash
-user@desktop:~ $ echo $PATH
-user@desktop:~ $ echo $LD_LIBRARY_PATH
+user@desktop:~ $ cd ~/Lepton/lepton_module
+user@desktop:~/Lepton/lepton_module$ git checkout kernel-5.10
 ```
+
+Be sure to use the version that matches your Pi kernel version, e.g. replace
+"kernel-5.10" with "kernel-4.19" if your Pi is still running 4.19.
 
 Compile the Lepton driver and its corresponding device tree overlay:
 
 ```bash
-user@desktop:~ $ cd ~/linux
-user@desktop:~/linux $ make -j $(nproc) oldconfig zImage modules 
-user@desktop:~/linux $ cd ~/rpi-lepton/lepton_module
-user@desktop:~/rpi-lepton/lepton_module $ make -C ~/linux M=$PWD modules 
-user@desktop:~/rpi-lepton/lepton_module $ ~/linux/scripts/dtc/dtc flir-lepton-RPI.dts -o flir-lepton-RPI.dtbo
+user@desktop:~/Lepton/lepton_module $ make -C ~/linux M=$PWD modules 
+user@desktop:~/Lepton/lepton_module $ ~/linux/scripts/dtc/dtc flir-lepton-RPI.dts -o flir-lepton-RPI.dtbo
 ```
 
 Ignore any warnings that come from compiling. 
 
 Now compile the example lepton apps:
 ```bash
-user@desktop:~/rpi-lepton/lepton_module $ cd ~/rpi-lepton
-user@desktop:~/rpi-lepton $ make
+pi@raspberrypi:~/Lepton/lepton_module $ cd ~/Lepton
+pi@raspberrypi:~/Lepton $ make
 ```
 
-### Copy built software onto Raspberry Pi
+### Install Lepton software on Raspberry Pi
 
-Now that the software has been built, copy it from the build host to the Pi.
-
+If the Lepton software was cross-compiled, copy the build directory to the Raspberry Pi:
 ```bash
-user@desktop:~ $ rsync -avz ~/rpi-lepton pi@raspberrypi.local:rpi-lepton
+user@desktop:~/Lepton $ cd
+user@desktop:~ $ scp -r Lepton/ pi@raspberrypi.local:
 ```
 
-As before, you might need to replace "raspberry-pi.local" with the Pi's IP address.
-
-### Install lepton software on Raspberry Pi
-
-This whole section will be performed on your Pi.
+Complete the install on the Raspberry Pi.
 
 Install the user apps.
 
 ```bash
-pi@raspberrypi:~ $ cd ~/rpi-lepton
-pi@raspberrypi:~/rpi-lepton $ sudo cp lepton_control/vsync_app /usr/bin/
-pi@raspberrypi:~/rpi-lepton $ sudo cp lepton_data_collector/lepton_data_collector /usr/bin/
+pi@raspberrypi:~ $ cd ~/Lepton
+pi@raspberrypi:~/Lepton $ sudo cp lepton_control/rpi_vsync_app /usr/bin/
+pi@raspberrypi:~/Lepton $ sudo cp lepton_data_collector/lepton_data_collector /usr/bin/
 ```
 
 Install the kernel module.
 
 ```bash
-pi@raspberrypi:~ $ cd ~/rpi-lepton/lepton_module
-pi@raspberrypi:~/rpi-lepton/lepton_module $ sudo mkdir -p /lib/modules/$(uname -r)/extra
-pi@raspberrypi:~/rpi-lepton/lepton_module $ sudo cp lepton.ko /lib/modules/$(uname -r)/extra
-pi@raspberrypi:~/rpi-lepton/lepton_module $ sudo depmod -a
+pi@raspberrypi:~ $ cd ~/Lepton/lepton_module
+pi@raspberrypi:~/Lepton/lepton_module $ sudo mkdir -p /lib/modules/$(uname -r)/extra
+pi@raspberrypi:~/Lepton/lepton_module $ sudo cp lepton.ko /lib/modules/$(uname -r)/extra
+pi@raspberrypi:~/Lepton/lepton_module $ sudo depmod -a
 ```
 
-You will need to install the ```.dtbo``` file into the overlays folder.
+You will need to install the `.dtbo` file into the overlays folder.
 
 ```bash
-pi@raspberrypi:~/rpi-lepton/lepton_module $ sudo cp flir-lepton-RPI.dtbo /boot/overlays/
+pi@raspberrypi:~/rpi-lepton/lepton_module $ sudo cp flir-lepton-RPI.dtbo /boot/linux_image_overlays/
 ```
 
-You will then need to uncomment following values for flags in ```/boot/config.txt```:
+Specify the `i2c-dev` module as a dependency for the `lepton` module, by adding a new file in `/etc/modprobe.d`:
 
 ```bash
-dtparam=i2c_arm=on
-dtparam=i2s=on
-dtparam=spi=on
+pi@raspberrypi:~/rpi-lepton/lepton_module $ echo "softdep lepton pre: i2c-dev" > /tmp/lepton.conf
+pi@raspberrypi:~/rpi-lepton/lepton_module $ sudo mkdir -p /etc/modprobe.d
+pi@raspberrypi:~/rpi-lepton/lepton_module $ sudo mv /tmp/lepton.conf /etc/modprobe.d/
 ```
 
-This can be done by opening the file and ensuring there is no `#` in front of them.
+Edit the `/boot/config.txt` file once more, and add the following line:
 
 ```bash
-pi@raspberrypi:~ $ sudo nano /boot/config.txt
-```
-
-This will enable i2c and spi after the Raspberry Pi is rebooted. Alongside uncommenting these, you will also need to add the following line:
-
-```
 dtoverlay=flir-lepton-RPI
 ```
 
-This will enable the overlay you just built. You will need to reboot the RaspberryPi for the changes to ```config.txt``` to take effect.
+This will enable the overlay you just built. You will need to reboot the Raspberry Pi for the changes to `config.txt` to take effect.
 
 ```bash
 pi@raspberrypi:~ $ sudo reboot
@@ -349,16 +481,34 @@ If the lepton is responding, you will see
 ```
 
 If you see dashes `--` in place of `2a`, there is a wiring or hardware problem
-that needs to be resolved before going any further. Check the wiring and also 
+that needs to be resolved before going any further. Check the wiring and also
 that the lepton is firmly seated in its socket.
 
-Once everything is connected, run `vsync_app` 
+Once everything is connected, run `rpi_vsync_app`:
 
 ```bash
-pi@raspberrypi:~ $ vsync_app
+pi@raspberrypi:~ $ rpi_vsync_app
 ```
 
-The program should terminate quickly after performing various I2C commands. If it runs indefinitely, quit the program, disconnect the VIN and GND, and try again.
+The program should terminate quickly after performing various I2C commands.  Double-check the output for common
+problems.  In the last six lines of output:
+```
+i2cdev_read_byte_data(rx_adr=0x25e80, rx_data=0x25670, rx_size=2) called.
+Writing big-endian address 0x0028
+Read back 2 bytes from I2C read:
+bc 45   <-- if both values are 0, check that the Lepton hasn't popped out of its socket, and re-run i2detect.
+
+LEP_GetOemGpioMode gpio_mode = 5 result = 0.
+```
+
+Check that the bytes read back are non-zero.  If all bytes read back are "0", or the error message "Remote I/O error" appears, power down the Raspberry Pi and try re-seating the Lepton in its socket, and double-check the I2C signal connections between the break-out board and the Raspberry Pi (specifically `SCL` and `SDA`).  Restart the Pi and try this step again.  The "Remote I/O error" messages may also appear if other I2C devices are sharing the I2C bus, in which case try removing other external I2C devices (if any) to find if that's the cause.
+
+If the message "Bad file descriptor" is displayed, the `i2c-dev` module may not have been loaded.  Try running:
+```bash
+pi@raspberrypi:~ $ sudo modprobe i2c-dev
+```
+
+Re-run `rpi_vsync_app` and again check its output to make sure it succeeded.
 
 You can use the `lepton_data_collector` application to capture grayscale images from the video device. 
 
@@ -379,7 +529,7 @@ root@raspberrypi:/home/pi# lepton_data_collector -3 -c 50 -o /tmp/capture/frame_
 
 When complete, there should be 50 images captured from Lepton 3.X (about 5 seconds worth at ~9 fps) named `/tmp/capture/frame_000000.gray` through `/tmp/capture/frame_000049.gray`.
 
-These images can be viewed on a Linux system using the ImageJ Java application, available from [here](<https://imagej.nih.gov/ij/download.html>). From the File menu, select `Import->Raw...`, and set image type to 16-bit unsigned along with the width and height (80x60 for Lepton 2.X, 160x120 for Lepton 3.X) in the dialog box that appears after selecting the file name.  The entire sequence can be placed into an image stack if the `Open all files in folder` checkbox is checked. Loading the files into an image stack makes it possible to produce a .avi movie from the frames using `File->Save As->AVI...` and setting the frame rate to 9 fps.
+These images can be viewed on a Linux system using the ImageJ Java application, available from [here](https://imagej.nih.gov/ij/download.html). From the File menu, select `Import->Raw...`, and set image type to 16-bit unsigned along with the width and height (80x60 for Lepton 2.X, 160x120 for Lepton 3.X) in the dialog box that appears after selecting the file name.  The entire sequence can be placed into an image stack if the `Open all files in folder` checkbox is checked. Loading the files into an image stack makes it possible to produce a .avi movie from the frames using `File->Save As->AVI...` and setting the frame rate to 9 fps.
 
 ## Troubleshooting
 
@@ -388,7 +538,7 @@ These images can be viewed on a Linux system using the ImageJ Java application, 
 Additional debug information can be retrieved by running:
 
 ```bash
-user@desktop:~ $ dmesg | less
+pi@raspberrypi:~ $ dmesg | less
 ```
 
 ### "I just can't seem to get the module to load!"
@@ -396,13 +546,13 @@ user@desktop:~ $ dmesg | less
 There might have been either an issue when compiling or the dependencies weren't correctly found. Try installing the lepton module manually again:
 
 ```bash
-user@desktop:~ $ sudo modprobe lepton
+pi@raspberrypi:~ $ sudo modprobe lepton
 ```
 
 If the lepton module can't be found, try running the following command to build the dependencies:
 
 ```bash
-user@desktop:~ $ sudo depmod -a
+pi@raspberrypi:~ $ sudo depmod -a
 ```
 
-Now, run ```modprobe``` again. 
+Now, run `modprobe` again.
